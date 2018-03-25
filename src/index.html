@@ -20,6 +20,7 @@
 
         <script type="text/javascript" src="three.min.js"></script>
         <script type="text/javascript" src="OrbitControls.js"></script>
+        <script type="text/javascript" src="ColladaLoader.js"></script>
 
         <script type="text/javascript" src="gauge.min.js"></script>
         <script type="text/javascript" src="maptalks.min.js"></script>
@@ -194,6 +195,18 @@ docker run --rm --net=host -p 8081:8081 -v $(pwd)/src:/opt/vehicle-view testview
 
 <script>
     var scene = new THREE.Scene();
+
+    var car;
+
+    var loadingManager = new THREE.LoadingManager( function() {
+        scene.add( car );
+    } );
+    // collada
+    var loader = new THREE.ColladaLoader( loadingManager );
+    loader.load( 'car.dae', function ( collada ) {
+        car = collada.scene;
+    } );
+
 
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize( 700, 500 );
