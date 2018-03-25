@@ -13,6 +13,8 @@
         <script type="text/javascript" src="https://unpkg.com/maptalks/dist/maptalks.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/smoothie/1.32.0/smoothie.min.js"></script>
 -->
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <link type="text/css" rel="stylesheet" href="font-awesome.min.css"/>
         <link type="text/css" rel="stylesheet" href="maptalks.css"/>
 
@@ -125,15 +127,14 @@
 
 <body style="font-family:Awesome;">
 
-<div class="bg">
-    <div class="module">
-        <header>
-            <h1>vehicle view</h1>
-        </header>
+<div class="container-fluid">
+    <div class="row py-5">
+        <div class="col-12 d-flex justify-content-center">
+            <h1>Vehicle view</h1>
+        </div>
     </div>
-
-    <div>
-        <div style="overflow:auto">
+    <div class="row ">
+        <div class="col-10 d-flex justify-content-center">
             <div class="main">
                 <div class="elementNoShadow">
                     <center>
@@ -141,38 +142,48 @@
                     </center>
                 </div>
             </div>
-
-            <div class="right">
+        </div>
+        <div class="col-2 d-flex flex-column justify-content-center">
                 <div class="element">
-                    <center>
-                        <i id="connectionStatusSymbol" class="fa fa-taxi" style="font-size:30px;color:#555"></i>
-                        <div id="connectionStatusText">disconnected</div>
-                    </center>
-                </div>
-
-                <div class="element">
-                    <center>
-                    <canvas id="speed"></canvas>
-                    </center>
-                </div>
-
-                <div class="element">
-                    <center>
-                    <div id="map"></div>
-                    </center>
-                </div>
-
-                <div class="element">
-                    <center>
-                    <canvas id="cpu-load" width="220" height="100"></canvas>
-                    </center>
-                </div>
-
-            </div>
+                        <center>
+                            <i id="connectionStatusSymbol" class="fa fa-taxi" style="font-size:30px;color:#555"></i>
+                            <div id="connectionStatusText">disconnected</div>
+                        </center>
+                    </div>
+    
+                    <div class="element">
+                        <center>
+                        <canvas id="speed"></canvas>
+                        </center>
+                    </div>
+    
+                    <div class="element">
+                        <center>
+                        <div id="map"></div>
+                        </center>
+                    </div>
+    
+                    <div class="element">
+                        <center>
+                        <canvas id="cpu-load" width="220" height="100"></canvas>
+                        </center>
+                    </div>
         </div>
     </div>
+
+
+   
 </div>
 
+
+
+
+
+</body>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 <script>
     var scene = new THREE.Scene();
@@ -373,7 +384,7 @@ var map = new maptalks.Map("map",{
 
         var oldTimeStamp = 0;
         ws.onmessage = function(evt) {
-            <!--This method will pass an OpenDaVINCI container to libcluon to parse it into a JSON object using the provided message specification. -->
+            // This method will pass an OpenDaVINCI container to libcluon to parse it into a JSON object using the provided message specification.
             var data = JSON.parse(__libcluon.decodeEnvelopeToJSON(evt.data));
 
             if (data.dataType > 0) {
@@ -476,7 +487,5 @@ var map = new maptalks.Map("map",{
     }
 </script>
 
-
-</body>
 </html>
 
