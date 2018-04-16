@@ -88,7 +88,7 @@
               z-index: 1;
             }
 
-docker run --rm --net=host -p 8081:8081 -v $(pwd)/src:/opt/vehicle-view testviewer --cid=111            div.smoothie-chart-tooltip {
+            div.smoothie-chart-tooltip {
               background: #444;
               padding: 1em;
               margin-top: 20px;
@@ -135,11 +135,20 @@ docker run --rm --net=host -p 8081:8081 -v $(pwd)/src:/opt/vehicle-view testview
         </div>
     </div>
     <div class="row ">
-        <div class="col-xs-12 col-md-10 d-flex justify-content-center">
+        <div class="col-xs-12 col-md-5 d-flex justify-content-center">
             <div class="main">
                 <div class="elementNoShadow">
                     <center>
                         <div id="ego-3dview"></div>
+                    </center>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-5 d-flex justify-content-center">
+            <div class="main">
+                <div class="elementNoShadow">
+                    <center>
+                        <div id="3d-map"></div>
                     </center>
                 </div>
             </div>
@@ -253,6 +262,107 @@ docker run --rm --net=host -p 8081:8081 -v $(pwd)/src:/opt/vehicle-view testview
     animate();
 </script>
 
+<script>
+    var orbScene = new THREE.Scene();
+
+    var orbCar;
+
+    // collada
+    loader.load( 'car.dae', function ( collada ) {
+        orbCar = collada.scene;
+    } );
+
+
+    var orbRenderer = new THREE.WebGLRenderer();
+    orbRenderer.setSize( 700, 500 );
+    orbRenderer.setClearColor(new THREE.Color(0x00000000));
+    document.getElementById('3d-map').appendChild(orbRenderer.domElement);
+
+    var orbCamera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    orbCamera.position.y = 5;
+    orbCamera.position.z = 5;
+    orbCamera.lookAt (new THREE.Vector3(0, 0, 0));
+    orbScene.add (orbCamera);
+
+
+    var orbControls = new THREE.OrbitControls(orbCamera, orbRenderer.domElement);
+
+
+    var orbPointLight = new THREE.PointLight(0xffffff);
+    orbPointLight.position.set (0, 20, 20);
+    orbScene.add (orbPointLight);
+
+    var orbAmbientLight = new THREE.AmbientLight (0xaaaaaa);
+    orbScene.add(orbAmbientLight);
+
+
+    var orbGridXZ = new THREE.GridHelper(50, 50, 0xff0000, 0xffffff);
+    orbScene.add(orbGridXZ);
+
+
+    // point_cloud
+    var orbMap = new THREE.BufferGeometry();
+    var MAX_POINTS = 63000;
+    var orbPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
+    orbPositions.fill(0);
+    orbMap.addAttribute('position', new THREE.BufferAttribute(orbPositions, 3));
+    var material_orbPointcloud = new THREE.PointsMaterial( { color: 0x0000ff, size: 0.02 } );
+    var particles_orbPointcloud = new THREE.Points( orbMap, material_orbPointcloud );
+    orbScene.add( particles_orbPointcloud );
+
+    var orbAnimate = function () {
+        requestAnimationFrame( orbAnimate );
+        orbRenderer.render(orbScene, orbCamera);
+    };
+
+    orbAnimate();
+</script>
+
+<script>
+
+    orbPositions[0] = 0;
+    orbPositions[1] = 0;
+    orbPositions[2] = 1;
+
+    orbPositions[3] = 1;
+    orbPositions[4] = 0;
+    orbPositions[5] = 1;
+
+    orbPositions[4] = 1;
+    orbPositions[5] = 1;
+    orbPositions[6] = 1;
+
+    orbPositions[7] = 0;
+    orbPositions[8] = 1;
+    orbPositions[9] = 1;
+
+    orbPositions[10] = 2;
+    orbPositions[11] = 2;
+    orbPositions[12] = 1;
+
+    orbPositions[13] = 2;
+    orbPositions[14] = 1;
+    orbPositions[15] = 2;
+
+    orbPositions[14] = 2;
+    orbPositions[15] = 2;
+    orbPositions[16] = 2;
+
+    orbPositions[17] = 1;
+    orbPositions[18] = 2;
+    orbPositions[19] = 2;
+
+    particles_orbPointcloud.geometry.attributes.position.needsUpdate = true;
+
+    var insertMapPoints = function(mapPoints)
+    {
+        for(var i in mapPoints)
+        {
+
+        }
+    }
+
+</script>
 
 <script>
 var gaugePS = new RadialGauge({
