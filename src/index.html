@@ -343,7 +343,8 @@
 
     var __libcluon = libcluon();
 
-    function getResourceFrom(url) {
+    function getResourceFrom(url)
+    {
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", url, false /*asynchronous request*/);
         xmlHttp.send(null);
@@ -377,7 +378,7 @@
                     oldTimeStamp = data.sampleTimeStamp.seconds * 1000 * 1000 + data.sampleTimeStamp.microseconds;
                 }
                 else
-                    {
+                {
                     var currentTimeStamp = data.sampleTimeStamp.seconds * 1000 * 1000 + data.sampleTimeStamp.microseconds;
                     dataLine.append(new Date().getTime(), Math.abs(currentTimeStamp - oldTimeStamp));
                     oldTimeStamp = currentTimeStamp;
@@ -399,7 +400,38 @@
                 var distances = window.atob(data.opendlv_proxy_PointCloudReading.distances);
 
                 console.log(distances);
-                // TODO: Parse map points.
+                var mapPoints = [];
+                for(var i = 0; i < distances.length; i += 12)
+                {
+                    var mapPoint = {};
+                    for(var j = 0; j < 3; j++)
+                    {
+                        var bits = (distances[i + j] << 24) | (distances[i + j + 1] << 16) | (distances[i + j + 2] << 8) | (distances[i + j + 3]);
+                        var sign = ((bits >>> 31) == 0) ? 1.0 : -1.0;
+                        var e = ((bits >>> 23) & 0xff);
+                        var m = (e == 0) ? (bits & 0x7fffff) << 1 : (bits & 0x7fffff) | 0x800000;
+                        var f = sign * m * Math.pow(2, e - 150);
+
+                        if(j === 0)
+                        {
+                            mapPoint.x = f;
+                        }
+                        else if(j === 1)
+                        {
+                            mapPoint.y = f;
+                        }
+                        else if(j === 2)
+                        {
+                            mapPoint.z = f;
+                        }
+                    }
+
+                    console.log(mapPoint);
+                    mapPoints[i/4] = mapPoint;
+                }
+
+                console.log(mapPoints);
+                insertMapPoints(mapPoints);
             }
         };
 
