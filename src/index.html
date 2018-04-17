@@ -399,7 +399,6 @@
                 // CompactPointCloud
                 var distances = window.atob(data.opendlv_proxy_PointCloudReading.distances);
 
-                console.log(distances);
                 var mapPoints = [];
                 for(var i = 0; i < distances.length; i += 12)
                 {
@@ -426,7 +425,6 @@
                         }
                     }
 
-                    console.log(mapPoint);
                     mapPoints[i/4] = mapPoint;
                 }
 
