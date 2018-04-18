@@ -398,7 +398,7 @@
             {
                 // CompactPointCloud
                 var distances = window.atob(data.opendlv_proxy_PointCloudReading.distances);
-                console.log(typeof distances);
+                console.log("got type 49");
                 var i = 0;
                 var coordinates = [];
                 var precision = 4;
@@ -425,7 +425,6 @@
                     mappoint.z = coordinates[i+2];
                     mappoints.push(mappoint);
                 }
-                console.log(mappoints);
                 insertMapPoints(mappoints);
                 // var mapPoints = [];
                 // var direction = 0;
