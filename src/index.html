@@ -163,7 +163,7 @@
                                 </center>
                             </div>
                           </div>
-                          <div class="card">
+                          currentIndex <div class="card">
                                 <div class="card-body">
                                         <center>
                                                 <canvas id="speed"></canvas>
@@ -398,38 +398,123 @@
             {
                 // CompactPointCloud
                 var distances = window.atob(data.opendlv_proxy_PointCloudReading.distances);
-
-                var mapPoints = [];
-                for(var i = 0; i < distances.length; i += 12)
-                {
-                    var mapPoint = {};
-                    for(var j = 0; j < 3; j++)
-                    {
-                        var bits = (distances[i + j] << 24) | (distances[i + j + 1] << 16) | (distances[i + j + 2] << 8) | (distances[i + j + 3]);
-                        var sign = ((bits >>> 31) == 0) ? 1.0 : -1.0;
-                        var e = ((bits >>> 23) & 0xff);
-                        var m = (e == 0) ? (bits & 0x7fffff) << 1 : (bits & 0x7fffff) | 0x800000;
-                        var f = sign * m * Math.pow(2, e - 150);
-
-                        if(j === 0)
-                        {
-                            mapPoint.x = f;
-                        }
-                        else if(j === 1)
-                        {
-                            mapPoint.y = f;
-                        }
-                        else if(j === 2)
-                        {
-                            mapPoint.z = f;
-                        }
-                    }
-
-                    mapPoints[i/4] = mapPoint;
+                console.log(typeof distances);
+                var i = 0;
+                var coordinates = [];
+                var precision = 4;
+                while(i < distances.length) {
+                    if(distances[i] === '-') {
+                    var beforeDecimal =  distances.substring(i,i+distances.substring(i).indexOf('.'));
+                        var endOfNumber = distances.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
+                    coordinates.push(parseFloat(beforeDecimal+endOfNumber));
+                    i += beforeDecimal.length + endOfNumber.length + ':'.length;
                 }
+                else {
+                    var beforeDecimal =  distances.substring(i,i+distances.substring(i).indexOf('.'));
+                    var endOfNumber = distances.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
+                    coordinates.push(parseFloat(beforeDecimal+endOfNumber));
+                    i += beforeDecimal.length + endOfNumber.length + ':'.length;
+                }
+                }
+                var mappoints = [];
 
-                console.log(mapPoints);
-                insertMapPoints(mapPoints);
+                for (var i = 0; i < coordinates.length; i += 3) {
+                    var mappoint = {};
+                    mappoint.x = coordinates[i];
+                    mappoint.y = coordinates[i+1];
+                    mappoint.z = coordinates[i+2];
+                    mappoints.push(mappoint);
+                }
+                console.log(mappoints);
+                insertMapPoints(mappoints);
+                // var mapPoints = [];
+                // var direction = 0;
+                // for (var i = 0; i < distances.length; i += 15) {
+                //     for(var j = 0; j < i+11; j += 5) {
+                //         var mapPoint = {};
+                //         switch(direction){
+                //             case 0:
+                //                 mapPoint.x = parseFloat(distances[i+j]);
+                //                 direction++;
+                //                 break;
+                //             case 1:
+                //                 mapPoint.y = parseFloat();
+                //                 direction++;
+                //                 break;
+                //             case 2:
+                //                 mapPoint.z = parseFloat();
+                //                 direction = 0;
+                //                 break;
+                //             default:
+                //                 break;
+                //         }
+                //     }
+
+                // }
+
+                // for (var i = 0; i < distances.length; i += 12){
+                //     for(var j = i; j < i+11; j += 4) {
+                //         var data =  [distances[j], distances[j+1], distances[j+2], distances[j+3]];
+                //         var buf = new ArrayBuffer(4);
+                //         var view = new DataView(buf);
+                //         data.forEach(function (b, i) {
+                //             view.setUint8(i, b);
+                //         });
+                //         var num = view.getFloat32(0);
+                //         console.log(num);
+                //         // Done
+                //         console.log(num);
+                //     }
+                // }
+
+
+                // for(var i = 0; i < distances.length; i += 12)
+                // {
+                //     var data =  [distances[i], 226, 157, 10];
+                    
+                //     // Create a buffer
+                //     var buf = new ArrayBuffer(4);
+                //     // Create a data view of it
+                //     var view = new DataView(buf);
+
+                //     // set bytes
+                //     data.forEach(function (b, i) {
+                //         view.setUint8(i, b);
+                //     });
+
+                //     // Read the bits as a float; note that by doing this, we're implicitly
+                //     // converting it from a 32-bit float into JavaScript's native 64-bit double
+                //     var num = view.getFloat32(0);
+                //     // Done
+                //     console.log(num);
+                //     var mapPoint = {};
+                //     for(var j = 0; j < 3; j++)
+                //     {
+                //         var bits = (0xFF & distances[i + j]) << 24 | (0xFF & distances[i + j + 1]) << 16 | (0xFF & distances[i + j + 2]) << 8 | (0xFF & distances[i + j + 3]);
+                //         var sign = ((bits >>> 31) == 0) ? 1.0 : -1.0;
+                //         var e = ((bits >>> 23) & 0xff);
+                //         var m = (e == 0) ? (bits & 0x7fffff) << 1 : (bits & 0x7fffff) | 0x800000;
+                //         var f = sign * m * Math.pow(2, e - 150);
+
+                //         if(j === 0)
+                //         {
+                //             mapPoint.x = f;
+                //         }
+                //         else if(j === 1)
+                //         {
+                //             mapPoint.y = f;
+                //         }
+                //         else if(j === 2)
+                //         {
+                //             mapPoint.z = f;
+                //         }
+                //     }
+                //     console.log(mapPoint);
+                //     mapPoints[i/4] = mapPoint;
+                // }
+
+                //console.log(mapPoints);
+                //insertMapPoints(mapPoints);
             }
         };
 
