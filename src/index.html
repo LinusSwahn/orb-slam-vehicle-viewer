@@ -402,19 +402,22 @@
                 var i = 0;
                 var coordinates = [];
                 var precision = 4;
-                while(i < distances.length) {
-                    if(distances[i] === '-') {
-                    var beforeDecimal =  distances.substring(i,i+distances.substring(i).indexOf('.'));
+                while(i < distances.length)
+                {
+                    if(distances[i] === '-')
+                    {
+                        var beforeDecimal =  distances.substring(i,i+distances.substring(i).indexOf('.'));
+                            var endOfNumber = distances.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
+                        coordinates.push(parseFloat(beforeDecimal+endOfNumber));
+                        i += beforeDecimal.length + endOfNumber.length + ':'.length;
+                    }
+                    else
+                    {
+                        var beforeDecimal =  distances.substring(i,i+distances.substring(i).indexOf('.'));
                         var endOfNumber = distances.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
-                    coordinates.push(parseFloat(beforeDecimal+endOfNumber));
-                    i += beforeDecimal.length + endOfNumber.length + ':'.length;
-                }
-                else {
-                    var beforeDecimal =  distances.substring(i,i+distances.substring(i).indexOf('.'));
-                    var endOfNumber = distances.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
-                    coordinates.push(parseFloat(beforeDecimal+endOfNumber));
-                    i += beforeDecimal.length + endOfNumber.length + ':'.length;
-                }
+                        coordinates.push(parseFloat(beforeDecimal+endOfNumber));
+                        i += beforeDecimal.length + endOfNumber.length + ':'.length;
+                    }
                 }
                 var mappoints = [];
 
