@@ -299,21 +299,31 @@
     scene.add(ambientLight);
 
 
-    var gridXZ = new THREE.GridHelper(50, 50, 0xff0000, 0xffffff);
-    scene.add(gridXZ);
-
-
     //
-    var geometry_pointcloud = new THREE.BufferGeometry();
-    var MAX_POINTS = 63000;
-    var positions = new Float32Array(MAX_POINTS * 3); // 3 vertices per
-    positions.fill(0);
-    geometry_pointcloud.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-    var material_pointcloud = new THREE.PointsMaterial( { color: 0x0000ff, size: 0.02 } );
-    var particles_pointcloud = new THREE.Points( geometry_pointcloud, material_pointcloud );
-    scene.add( particles_pointcloud );
+    var pointCloud = new THREE.BufferGeometry();
+    var carPoints = new THREE.BufferGeometry();
+    var MAX_POINTS = 150000;
+
+    var pointPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per
+    var carPositions = new Float32Array(3000 * 3); // 3 vertices per
+
+    pointPositions.fill(0);
+    carPositions.fill(0);
+
+    pointCloud.addAttribute('position', new THREE.BufferAttribute(pointPositions, 3));
+    carPoints.addAttribute('position', new THREE.BufferAttribute(carPositions, 3));
+
+    var pointCloudMaterial = new THREE.PointsMaterial( { color: 0xffffff, size: 0.02 } );
+    var carMaterial = new THREE.PointsMaterial( { color: 0xff0000, size: 0.1 } );
+
+    var pointCloud = new THREE.Points( pointCloud, pointCloudMaterial );
+    var carPointCloud = new THREE.Points( carPoints, carMaterial );
+
+    scene.add( pointCloud );
+    scene.add( carPointCloud );
 
     var currentIndex = 0;
+    var currentCarIndex = 0;
 
     var animate = function ()
     {
@@ -326,16 +336,25 @@
 </script>
 
 <script>
+    var insertCarPoints = function(carPoint)
+    {
+        var positions = carPointCloud.geometry.attributes.position.array;
+        positions[currentCarIndex++] = carPoint.x;
+        positions[currentCarIndex++] = carPoint.y;
+        positions[currentCarIndex++] = carPoint.z;
+        carPointCloud.geometry.attributes.position.needsUpdate = true;
+    };
+
     var insertMapPoints = function(mapPoints)
     {
-        var positions = particles_pointcloud.geometry.attributes.position.array;
+        var positions = pointCloud.geometry.attributes.position.array;
         for(var i in mapPoints)
         {
             positions[currentIndex++] = mapPoints[i].x;
             positions[currentIndex++] = mapPoints[i].y;
             positions[currentIndex++] = mapPoints[i].z;
         }
-        particles_pointcloud.geometry.attributes.position.needsUpdate = true;
+        pointCloud.geometry.attributes.position.needsUpdate = true;
     };
 </script>
 
@@ -402,6 +421,7 @@
                 var i = 0;
                 var coordinates = [];
                 var precision = 4;
+
                 while(i < distances.length)
                 {
                     if(distances[i] === '-')
@@ -421,12 +441,21 @@
                 }
                 var mappoints = [];
 
-                for (var i = 0; i < coordinates.length; i += 3) {
+                for (var i = 0; i < coordinates.length; i += 3)
+                {
                     var mappoint = {};
                     mappoint.x = coordinates[i];
                     mappoint.y = coordinates[i+1];
                     mappoint.z = coordinates[i+2];
-                    mappoints.push(mappoint);
+
+                    if(i === 3)
+                    {
+                        insertCarPoints(mappoint);
+                    }
+                    else
+                    {
+                        mappoints.push(mappoint);
+                    }
                 }
                 insertMapPoints(mappoints);
                 // var mapPoints = [];
