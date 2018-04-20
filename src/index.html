@@ -356,6 +356,40 @@
         }
         pointCloud.geometry.attributes.position.needsUpdate = true;
     };
+    var floatArrayFromString = function(inString, precision, delimiter){
+        var mapCoordinatesParsed = [];
+        var i = 0;
+        while(i < inString.length)
+        {
+            if(inString[i] === '-')
+            {
+                var beforeDecimal =  inString.substring(i,i+inString.substring(i).indexOf('.'));
+                    var endOfNumber = inString.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
+                mapCoordinatesParsed.push(parseFloat(beforeDecimal+endOfNumber));
+                i += beforeDecimal.length + endOfNumber.length + delimiter.length;
+            }
+            else
+            {
+                var beforeDecimal =  inString.substring(i,i+inString.substring(i).indexOf('.'));
+                var endOfNumber = inString.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
+                mapCoordinatesParsed.push(parseFloat(beforeDecimal+endOfNumber));
+                i += beforeDecimal.length + endOfNumber.length + delimiter.length;
+            }
+        }
+        return mapCoordinatesParsed;
+    }
+    var mapPointsArrayFromFloatArray = function(in_array){
+        var mappoints = [];
+        for (var i = 0; i < in_array.length; i += 3)
+        {
+            var mappoint = {};
+            mappoint.x = in_array[i];
+            mappoint.y = in_array[i+1];
+            mappoint.z = in_array[i+2];
+            mappoints.push(mappoint);
+        }
+        return mappoints;
+    }
 </script>
 
 <script>
@@ -389,7 +423,7 @@
         {
             // This method will pass an OpenDaVINCI container to libcluon to parse it into a JSON object using the provided message specification.
             var data = JSON.parse(__libcluon.decodeEnvelopeToJSON(evt.data));
-
+            console.log(data.dataType);
             if (data.dataType > 0)
             {
                 if (oldTimeStamp == 0)
@@ -413,51 +447,19 @@
                 var c = [data.opendlv_proxy_GeodeticWgs84Reading.longitude, data.opendlv_proxy_GeodeticWgs84Reading.latitude];
                 map.setCenter(c);
             }
-            if (data.dataType == 49)
+            if (data.dataType == 1193)
             {
                 // CompactPointCloud
-                var distances = window.atob(data.opendlv_proxy_PointCloudReading.distances);
-                console.log("got type 49");
-                var i = 0;
-                var coordinates = [];
-                var precision = 4;
-
-                while(i < distances.length)
-                {
-                    if(distances[i] === '-')
-                    {
-                        var beforeDecimal =  distances.substring(i,i+distances.substring(i).indexOf('.'));
-                            var endOfNumber = distances.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
-                        coordinates.push(parseFloat(beforeDecimal+endOfNumber));
-                        i += beforeDecimal.length + endOfNumber.length + ':'.length;
-                    }
-                    else
-                    {
-                        var beforeDecimal =  distances.substring(i,i+distances.substring(i).indexOf('.'));
-                        var endOfNumber = distances.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
-                        coordinates.push(parseFloat(beforeDecimal+endOfNumber));
-                        i += beforeDecimal.length + endOfNumber.length + ':'.length;
-                    }
-                }
-                var mappoints = [];
-
-                for (var i = 0; i < coordinates.length; i += 3)
-                {
-                    var mappoint = {};
-                    mappoint.x = coordinates[i];
-                    mappoint.y = coordinates[i+1];
-                    mappoint.z = coordinates[i+2];
-
-                    if(i === 3)
-                    {
-                        insertCarPoints(mappoint);
-                    }
-                    else
-                    {
-                        mappoints.push(mappoint);
-                    }
-                }
-                insertMapPoints(mappoints);
+                var mapCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.mapCoordinates);
+                var cameraCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.cameraCoordinates);
+                console.log("got type 1193");
+                var mapCoordinatesParsed = floatArrayFromString(mapCoordinatesRaw, 4, ':');
+                var cameraCoordinatesParsed = floatArrayFromString(cameraCoordinatesRaw, 4, ':');
+                var mappointsFromMap = mapPointsArrayFromFloatArray(mapCoordinatesParsed);
+                var mappointsFromCamera = mapPointsArrayFromFloatArray(cameraCoordinatesParsed);
+                
+                //insertMapPoints(mappointsFromMap);
+                insertCarPoints(mappointsFromCamera);
                 // var mapPoints = [];
                 // var direction = 0;
                 // for (var i = 0; i < distances.length; i += 15) {
@@ -466,7 +468,7 @@
                 //         switch(direction){
                 //             case 0:
                 //                 mapPoint.x = parseFloat(distances[i+j]);
-                //                 direction++;
+                //           cameraCoordinates      direction++;
                 //                 break;
                 //             case 1:
                 //                 mapPoint.y = parseFloat();
