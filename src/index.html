@@ -338,7 +338,6 @@
 <script>
     var insertCameraPoints = function(carPoint)
     {
-        console.log(carPoint);
         var positions = carPointCloud.geometry.attributes.position.array;
         positions[currentCarIndex++] = carPoint.x;
         positions[currentCarIndex++] = carPoint.y;
@@ -357,6 +356,40 @@
         }
         pointCloud.geometry.attributes.position.needsUpdate = true;
     };
+    var floatArrayFromString = function(inString, precision, delimiter){
+        var mapCoordinatesParsed = [];
+        var i = 0;
+        while(i < inString.length)
+        {
+            if(inString[i] === '-')
+            {
+                var beforeDecimal =  inString.substring(i,i+inString.substring(i).indexOf('.'));
+                    var endOfNumber = inString.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
+                mapCoordinatesParsed.push(parseFloat(beforeDecimal+endOfNumber));
+                i += beforeDecimal.length + endOfNumber.length + delimiter.length;
+            }
+            else
+            {
+                var beforeDecimal =  inString.substring(i,i+inString.substring(i).indexOf('.'));
+                var endOfNumber = inString.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
+                mapCoordinatesParsed.push(parseFloat(beforeDecimal+endOfNumber));
+                i += beforeDecimal.length + endOfNumber.length + delimiter.length;
+            }
+        }
+        return mapCoordinatesParsed;
+    }
+    var mapPointsArrayFromFloatArray = function(in_array){
+        var mappoints = [];
+        for (var i = 0; i < in_array.length; i += 3)
+        {
+            var mappoint = {};
+            mappoint.x = in_array[i];
+            mappoint.y = in_array[i+1];
+            mappoint.z = in_array[i+2];
+            mappoints.push(mappoint);
+        }
+        return mappoints;
+    }
 </script>
 
 <script>
@@ -390,7 +423,6 @@
         {
             // This method will pass an OpenDaVINCI container to libcluon to parse it into a JSON object using the provided message specification.
             var data = JSON.parse(__libcluon.decodeEnvelopeToJSON(evt.data));
-
             if (data.dataType > 0)
             {
                 if (oldTimeStamp == 0)
@@ -417,67 +449,19 @@
             if (data.dataType == 1193)
             {
                 // CompactPointCloud
-                var mapCoordinates = window.atob(data.opendlv_proxy_OrbslamMap.mapCoordinates);
-                var cameraCoordinates = window.atob(data.opendlv_proxy_OrbslamMap.cameraCoordinates);
-                console.log("got type 1193");
-                var i = 0;
-                var coordinates = [];
-                var precision = 4;
+                var mapCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.mapCoordinates);
+                var cameraCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.cameraCoordinates);
 
-                while(i < mapCoordinates.length)
-                {
-                    if(mapCoordinates[i] === '-')
-                    {
-                        var beforeDecimal =  mapCoordinates.substring(i,i+mapCoordinates.substring(i).indexOf('.'));
-                            var endOfNumber = mapCoordinates.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
-                        coordinates.push(parseFloat(beforeDecimal+endOfNumber));
-                        i += beforeDecimal.length + endOfNumber.length + ':'.length;
-                    }
-                    else
-                    {
-                        var beforeDecimal =  mapCoordinates.substring(i,i+mapCoordinates.substring(i).indexOf('.'));
-                        var endOfNumber = mapCoordinates.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
-                        coordinates.push(parseFloat(beforeDecimal+endOfNumber));
-                        i += beforeDecimal.length + endOfNumber.length + ':'.length;
-                    }
-                }
-                var mappoints = [];
+                var mapCoordinatesParsed = floatArrayFromString(mapCoordinatesRaw, 4, ':');
+                var cameraCoordinatesParsed = floatArrayFromString(cameraCoordinatesRaw, 4, ':');
+                var mappointsFromMap = mapPointsArrayFromFloatArray(mapCoordinatesParsed);
 
-                for (var i = 0; i < coordinates.length; i += 3)
-                {
-                    var mappoint = {};
-                    mappoint.x = coordinates[i];
-                    mappoint.y = coordinates[i+1];
-                    mappoint.z = coordinates[i+2];
-
-                    mappoints.push(mappoint);
-                }
-                insertMapPoints(mappoints);
-
-                i = 0;
-                coordinates = [];
-                while(i < cameraCoordinates.length)
-                {
-                    if(cameraCoordinates[i] === '-')
-                    {
-                        var beforeDecimal =  cameraCoordinates.substring(i, i + cameraCoordinates.substring(i).indexOf('.'));
-                        var endOfNumber = cameraCoordinates.substring(i + beforeDecimal.length, i + beforeDecimal.length + precision + '.'.length);
-                        coordinates.push(parseFloat(beforeDecimal + endOfNumber));
-                        i += beforeDecimal.length + endOfNumber.length + ':'.length;
-                    }
-                    else
-                    {
-                        var beforeDecimal =  cameraCoordinates.substring(i, i + cameraCoordinates.substring(i).indexOf('.'));
-                        var endOfNumber = cameraCoordinates.substring(i + beforeDecimal.length, i + beforeDecimal.length + precision + '.'.length);
-                        coordinates.push(parseFloat(beforeDecimal + endOfNumber));
-                        i += beforeDecimal.length + endOfNumber.length + ':'.length;
-                    }
-                }
+                insertMapPoints(mappointsFromMap);
 
                 var cameraPoint = {};
-                cameraPoint.x = coordinates[0];
-                cameraPoint.y = coordinates[1];
-                cameraPoint.z = coordinates[2];
+                cameraPoint.x = cameraCoordinatesParsed[0];
+                cameraPoint.y = cameraCoordinatesParsed[1];
+                cameraPoint.z = cameraCoordinatesParsed[2];
 
                 insertCameraPoints(cameraPoint);
             }
