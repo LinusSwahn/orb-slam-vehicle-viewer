@@ -135,16 +135,16 @@
         </div>
     </div>
     <div class="row ">
-        <!--<div class="col-xs-12 col-md-5 d-flex justify-content-center">-->
-            <!--<div class="main">-->
-                <!--<div class="elementNoShadow">-->
-                    <!--<center>-->
-                        <!--<div id="ego-3dview"></div>-->
-                    <!--</center>-->
-                <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
-        <div class="col-xs-12 col-md-10 d-flex justify-content-center">
+        <div class="col-xs-12 col-md-5 d-flex justify-content-center">
+            <div class="main">
+                <div class="elementNoShadow">
+                    <center>
+                        <div id="lidar"></div>
+                    </center>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-5 d-flex justify-content-center">
             <div class="main">
                 <div class="elementNoShadow">
                     <center>
@@ -202,125 +202,96 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-<!--<script>-->
-    <!--var scene = new THREE.Scene();-->
+<script>
 
-    <!--var car;-->
-
-    <!--var loadingManager = new THREE.LoadingManager( function() {-->
-        <!--scene.add( car );-->
-    <!--} );-->
-    <!--// collada-->
-    <!--var loader = new THREE.ColladaLoader( loadingManager );-->
-    <!--loader.load( 'car.dae', function ( collada ) {-->
-        <!--car = collada.scene;-->
-    <!--} );-->
-
-
-    <!--var renderer = new THREE.WebGLRenderer();-->
-    <!--renderer.setSize( 700, 500 );-->
-    <!--renderer.setClearColor(new THREE.Color(0x00000000));-->
-    <!--document.getElementById('ego-3dview').appendChild(renderer.domElement);-->
-
-    <!--var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );-->
-    <!--camera.position.y = 5;-->
-    <!--camera.position.z = 5;-->
-    <!--camera.lookAt (new THREE.Vector3(0, 0, 0));-->
-    <!--scene.add (camera);-->
-
-
-    <!--var controls = new THREE.OrbitControls(camera, renderer.domElement);-->
-
-
-    <!--var pointLight = new THREE.PointLight(0xffffff);-->
-    <!--pointLight.position.set (0, 20, 20);-->
-    <!--scene.add (pointLight);-->
-    <!---->
-    <!--var ambientLight = new THREE.AmbientLight (0xaaaaaa);-->
-    <!--scene.add(ambientLight);-->
-
-
-    <!--var gridXZ = new THREE.GridHelper(50, 50, 0xff0000, 0xffffff);-->
-    <!--scene.add(gridXZ);-->
-
-
-    <!--// point_cloud-->
-    <!--var geometry_pointcloud = new THREE.BufferGeometry();-->
-    <!--var MAX_POINTS = 63000;-->
-    <!--var positions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point-->
-    <!--positions.fill(0);-->
-    <!--geometry_pointcloud.addAttribute('position', new THREE.BufferAttribute(positions, 3));-->
-    <!--var material_pointcloud = new THREE.PointsMaterial( { color: 0x0000ff, size: 0.02 } );-->
-    <!--var particles_pointcloud = new THREE.Points( geometry_pointcloud, material_pointcloud );-->
-    <!--scene.add( particles_pointcloud );-->
-
-    <!--var animate = function () {-->
-        <!--requestAnimationFrame( animate );-->
-        <!--renderer.render(scene, camera);-->
-    <!--};-->
-
-    <!--animate();-->
-<!--</script>-->
+</script>
 
 <script>
-    var scene = new THREE.Scene();
+
+    var mapScene = new THREE.Scene();
+    var lidarScene = new THREE.Scene();
 
     // var car;
     //
     // var loadingManager = new THREE.LoadingManager( function() {
-    //     scene.add( car );
-    //     } );
+    //     lidarScene.add( car );
+    // } );
+    // // collada
     // var loader = new THREE.ColladaLoader( loadingManager );
     // loader.load( 'car.dae', function ( collada ) {
     //     car = collada.scene;
-    //     } );
+    // } );
 
+    var mapRenderer = new THREE.WebGLRenderer();
+    var lidarRenderer = new THREE.WebGLRenderer();
 
-    var renderer = new THREE.WebGLRenderer();
-    renderer.setSize( 700, 500 );
-    renderer.setClearColor(new THREE.Color(0x00000000));
-    document.getElementById('3d-map').appendChild(renderer.domElement);
+    mapRenderer.setSize( 700, 500 );
+    lidarRenderer.setSize( 700, 500 );
 
-    var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    camera.position.y = 5;
-    camera.position.z = 5;
-    camera.lookAt (new THREE.Vector3(0, 0, 0));
-    scene.add (camera);
+    mapRenderer.setClearColor(new THREE.Color(0x00000000));
+    lidarRenderer.setClearColor(new THREE.Color(0x00000000));
 
+    document.getElementById('3d-map').appendChild(mapRenderer.domElement);
+    document.getElementById('lidar').appendChild(lidarRenderer.domElement);
 
-    var controls = new THREE.OrbitControls(camera, renderer.domElement);
+    var mapCamera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    var lidarCamera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
 
+    mapCamera.position.y = 5;
+    mapCamera.position.z = 5;
+    lidarCamera.position.y = 5;
+    lidarCamera.position.z = 5;
+    mapCamera.lookAt (new THREE.Vector3(0, 0, 0));
+    lidarCamera.lookAt (new THREE.Vector3(0, 0, 0));
+    mapScene.add (mapCamera);
+    lidarScene.add (lidarCamera);
 
-    var pointLight = new THREE.PointLight(0xffffff);
-    pointLight.position.set (0, 20, 20);
-    scene.add (pointLight);
+    var mapControls = new THREE.OrbitControls(mapCamera, mapRenderer.domElement);
+    var lidarControls = new THREE.OrbitControls(lidarCamera, lidarRenderer.domElement);
 
-    var ambientLight = new THREE.AmbientLight (0xaaaaaa);
-    scene.add(ambientLight);
+    var mapPointLight = new THREE.PointLight(0xffffff);
+    var lidarPointLight = new THREE.PointLight(0xffffff);
+    mapPointLight.position.set (0, 20, 20);
+    lidarPointLight.position.set (0, 20, 20);
+    mapScene.add (mapPointLight);
+    lidarScene.add (lidarPointLight);
 
+    var mapAmbientLight = new THREE.AmbientLight (0xaaaaaa);
+    var lidarAmbientLight = new THREE.AmbientLight (0xaaaaaa);
+    mapScene.add(mapAmbientLight);
+    lidarScene.add(lidarAmbientLight);
 
-    //
-    var pointCloud = new THREE.BufferGeometry();
-    var carPoints = new THREE.BufferGeometry();
+    var gridXZ = new THREE.GridHelper(50, 50, 0xff0000, 0x0000ff);
+    lidarScene.add(gridXZ);
+
+    var mapPointGeometry = new THREE.BufferGeometry();
+    var carPointGeometry = new THREE.BufferGeometry();
+    var lidarPointGeometry = new THREE.BufferGeometry();
     var MAX_POINTS = 150000;
 
-    var pointPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per
+    var mapPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per
     var carPositions = new Float32Array(3000 * 3); // 3 vertices per
+    var lidarPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
 
-    pointPositions.fill(0);
+    mapPositions.fill(0);
     carPositions.fill(0);
+    lidarPositions.fill(0);
 
-    pointCloud.addAttribute('position', new THREE.BufferAttribute(pointPositions, 3));
-    carPoints.addAttribute('position', new THREE.BufferAttribute(carPositions, 3));
+    mapPointGeometry.addAttribute('position', new THREE.BufferAttribute(mapPositions, 3));
+    carPointGeometry.addAttribute('position', new THREE.BufferAttribute(carPositions, 3));
+    lidarPointGeometry.addAttribute('position', new THREE.BufferAttribute(lidarPositions, 3));
 
-    var pointCloudMaterial = new THREE.PointsMaterial( { color: 0xffffff, size: 0.02 } );
+    var mapMaterial = new THREE.PointsMaterial( { color: 0xffffff, size: 0.02 } );
     var carMaterial = new THREE.PointsMaterial( { color: 0xff0000, size: 0.1 } );
+    var lidarMaterial = new THREE.PointsMaterial( { color: 0xffffff, size: 0.02 } );
 
-    var pointCloud = new THREE.Points( pointCloud, pointCloudMaterial );
-    var carPointCloud = new THREE.Points( carPoints, carMaterial );
+    var mapPointCloud = new THREE.Points( mapPointGeometry, mapMaterial );
+    var carPoints = new THREE.Points( carPointGeometry, carMaterial );
+    var lidarPointCloud = new THREE.Points( lidarPointGeometry, lidarMaterial );
 
-    scene.add( pointCloud );
-    scene.add( carPointCloud );
+    mapScene.add( mapPointCloud );
+    mapScene.add( carPoints );
+    lidarScene.add( lidarPointCloud );
 
     var currentIndex = 0;
     var currentCarIndex = 0;
@@ -328,7 +299,8 @@
     var animate = function ()
     {
         requestAnimationFrame( animate );
-        renderer.render(scene, camera);
+        mapRenderer.render(mapScene, mapCamera);
+        lidarRenderer.render(lidarScene, lidarCamera);
     };
 
     animate();
@@ -338,24 +310,48 @@
 <script>
     var insertCameraPoints = function(carPoint)
     {
-        var positions = carPointCloud.geometry.attributes.position.array;
+        var positions = carPoints.geometry.attributes.position.array;
         positions[currentCarIndex++] = carPoint.x;
         positions[currentCarIndex++] = carPoint.y;
         positions[currentCarIndex++] = carPoint.z;
-        carPointCloud.geometry.attributes.position.needsUpdate = true;
+        carPoints.geometry.attributes.position.needsUpdate = true;
     };
 
     var insertMapPoints = function(mapPoints)
     {
-        var positions = pointCloud.geometry.attributes.position.array;
+        var positions = mapPointCloud.geometry.attributes.position.array;
         for(var i in mapPoints)
         {
             positions[currentIndex++] = mapPoints[i].x;
             positions[currentIndex++] = mapPoints[i].y;
             positions[currentIndex++] = mapPoints[i].z;
         }
-        pointCloud.geometry.attributes.position.needsUpdate = true;
+        mapPointCloud.geometry.attributes.position.needsUpdate = true;
     };
+
+    var updateLidar = function(carPoint)
+    {
+        var lidarPositions = lidarPointCloud.geometry.attributes.position.array;
+        lidarPositions.fill(0);
+        var lidarIndex = 0;
+
+        var mapPositions = mapPointCloud.geometry.attributes.position.array;
+
+        for(var i = 0; i < currentIndex; i += 3)
+        {
+            var mapPoint = new THREE.Vector3(mapPositions[i], mapPositions[i + 1], mapPositions[i + 2])
+            var distance = mapPoint.distanceTo(carPoint);
+
+            if(distance < 50)
+            {
+                lidarPositions[lidarIndex++] = mapPoint.x - carPoint.x;
+                lidarPositions[lidarIndex++] = mapPoint.y - carPoint.y;
+                lidarPositions[lidarIndex++] = mapPoint.z - carPoint.z;
+            }
+        }
+        lidarPointCloud.geometry.attributes.position.needsUpdate = true;
+    }
+
     var floatArrayFromString = function(inString, precision, delimiter){
         var mapCoordinatesParsed = [];
         var i = 0;
@@ -378,17 +374,16 @@
         }
         return mapCoordinatesParsed;
     }
-    var mapPointsArrayFromFloatArray = function(in_array){
-        var mappoints = [];
+
+    var mapPointsArrayFromFloatArray = function(in_array)
+    {
+        var mapPoints = [];
         for (var i = 0; i < in_array.length; i += 3)
         {
-            var mappoint = {};
-            mappoint.x = in_array[i];
-            mappoint.y = in_array[i+1];
-            mappoint.z = in_array[i+2];
-            mappoints.push(mappoint);
+            var mapPoint = new THREE.Vector3(in_array[i], in_array[i + 1], in_array[i + 2]);
+            mapPoints.push(mapPoint);
         }
-        return mappoints;
+        return mapPoints;
     }
 </script>
 
@@ -454,16 +449,82 @@
 
                 var mapCoordinatesParsed = floatArrayFromString(mapCoordinatesRaw, 4, ':');
                 var cameraCoordinatesParsed = floatArrayFromString(cameraCoordinatesRaw, 4, ':');
-                var mappointsFromMap = mapPointsArrayFromFloatArray(mapCoordinatesParsed);
+                var mapPointsFromMap = mapPointsArrayFromFloatArray(mapCoordinatesParsed);
 
-                insertMapPoints(mappointsFromMap);
-
-                var cameraPoint = {};
-                cameraPoint.x = cameraCoordinatesParsed[0];
-                cameraPoint.y = cameraCoordinatesParsed[1];
-                cameraPoint.z = cameraCoordinatesParsed[2];
+                var cameraPoint = new THREE.Vector3(cameraCoordinatesParsed[0], cameraCoordinatesParsed[1], cameraCoordinatesParsed[2]);
 
                 insertCameraPoints(cameraPoint);
+
+                insertMapPoints(mapPointsFromMap);
+
+                updateLidar(cameraPoint, mapPointsFromMap);
+            }
+            if (data.dataType == 49)
+            {
+                // CompactPointCloud
+                var distances = window.atob(data.opendlv_proxy_PointCloudReading.distances);
+
+                var startAzimuth = data.opendlv_proxy_PointCloudReading.startAzimuth;
+                var endAzimuth = data.opendlv_proxy_PointCloudReading.endAzimuth;
+                var entriesPerAzimuth = data.opendlv_proxy_PointCloudReading.entriesPerAzimuth;
+                var numberOfPoints = distances.length / 2;
+                var numberOfAzimuths = numberOfPoints / entriesPerAzimuth;
+                var azimuthIncrement = (endAzimuth - startAzimuth) / numberOfAzimuths;
+
+                var GL_positions = lidarPointCloud.geometry.attributes.position.array;
+
+                // VLP16 sends 16 layers,
+                if (16 == entriesPerAzimuth) {
+                    GL_positions.fill(0);
+                    GL_position_index = 0;
+                }
+                // HDL32e sends the sequence 12, 11, 9 layers.
+                if (12 == entriesPerAzimuth) {
+                    GL_positions.fill(0);
+                    GL_position_index = 0;
+                }
+
+                var index = 0;
+                var azimuth = startAzimuth;
+                for (var azimuthIndex = 0; azimuthIndex < numberOfAzimuths; azimuthIndex++) {
+                    for (var sensorIndex = 0; sensorIndex < entriesPerAzimuth; sensorIndex++) {
+                        var verticalAngle = 0;
+                        if (16 == entriesPerAzimuth) {
+                            verticalAngle = verticalAngles16[sensorIndex];
+                        }
+                        if (12 == entriesPerAzimuth) {
+                            verticalAngle = verticalAngles12[sensorIndex];
+                        }
+                        if (11 == entriesPerAzimuth) {
+                            verticalAngle = verticalAngles11[sensorIndex];
+                        }
+                        if (9 == entriesPerAzimuth) {
+                            verticalAngle = verticalAngles9[sensorIndex];
+                        }
+
+                        var byte0 = distances.charCodeAt(index++);
+                        var byte1 = distances.charCodeAt(index++);
+                        var distance = ( ((0xff & byte0) << 8) | (0xff & byte1) ) / 500.0;
+                        if (distance > 1.0) {
+                            var xyDistance = distance * Math.cos(verticalAngle * Math.PI/180.0);
+                            var x = xyDistance * Math.sin(azimuth * Math.PI/180.0);
+                            var y = xyDistance * Math.cos(azimuth * Math.PI/180.0);
+                            var z = distance * Math.sin(verticalAngle * Math.PI/180.0);
+                            if (GL_position_index < MAX_POINTS-3) {
+                                GL_positions[GL_position_index++] = x;
+                                GL_positions[GL_position_index++] = z;
+                                GL_positions[GL_position_index++] = -y;
+                            }
+                        }
+                    }
+                    azimuth += azimuthIncrement;
+                }
+
+                // Trigger update
+                if ( (16 == entriesPerAzimuth)  ||
+                     (9 == entriesPerAzimuth) ) {
+                    lidarPointCloud.geometry.attributes.position.needsUpdate = true;
+                }
             }
         };
 
