@@ -336,8 +336,9 @@
 </script>
 
 <script>
-    var insertCarPoints = function(carPoint)
+    var insertCameraPoints = function(carPoint)
     {
+        console.log(carPoint);
         var positions = carPointCloud.geometry.attributes.position.array;
         positions[currentCarIndex++] = carPoint.x;
         positions[currentCarIndex++] = carPoint.y;
@@ -413,28 +414,29 @@
                 var c = [data.opendlv_proxy_GeodeticWgs84Reading.longitude, data.opendlv_proxy_GeodeticWgs84Reading.latitude];
                 map.setCenter(c);
             }
-            if (data.dataType == 49)
+            if (data.dataType == 1193)
             {
                 // CompactPointCloud
-                var distances = window.atob(data.opendlv_proxy_PointCloudReading.distances);
-                console.log("got type 49");
+                var mapCoordinates = window.atob(data.opendlv_proxy_OrbslamMap.mapCoordinates);
+                var cameraCoordinates = window.atob(data.opendlv_proxy_OrbslamMap.cameraCoordinates);
+                console.log("got type 1193");
                 var i = 0;
                 var coordinates = [];
                 var precision = 4;
 
-                while(i < distances.length)
+                while(i < mapCoordinates.length)
                 {
-                    if(distances[i] === '-')
+                    if(mapCoordinates[i] === '-')
                     {
-                        var beforeDecimal =  distances.substring(i,i+distances.substring(i).indexOf('.'));
-                            var endOfNumber = distances.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
+                        var beforeDecimal =  mapCoordinates.substring(i,i+mapCoordinates.substring(i).indexOf('.'));
+                            var endOfNumber = mapCoordinates.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
                         coordinates.push(parseFloat(beforeDecimal+endOfNumber));
                         i += beforeDecimal.length + endOfNumber.length + ':'.length;
                     }
                     else
                     {
-                        var beforeDecimal =  distances.substring(i,i+distances.substring(i).indexOf('.'));
-                        var endOfNumber = distances.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
+                        var beforeDecimal =  mapCoordinates.substring(i,i+mapCoordinates.substring(i).indexOf('.'));
+                        var endOfNumber = mapCoordinates.substring(i+beforeDecimal.length, i+beforeDecimal.length + precision + '.'.length);
                         coordinates.push(parseFloat(beforeDecimal+endOfNumber));
                         i += beforeDecimal.length + endOfNumber.length + ':'.length;
                     }
@@ -448,104 +450,36 @@
                     mappoint.y = coordinates[i+1];
                     mappoint.z = coordinates[i+2];
 
-                    if(i === 3)
+                    mappoints.push(mappoint);
+                }
+                insertMapPoints(mappoints);
+
+                i = 0;
+                coordinates = [];
+                while(i < cameraCoordinates.length)
+                {
+                    if(cameraCoordinates[i] === '-')
                     {
-                        insertCarPoints(mappoint);
+                        var beforeDecimal =  cameraCoordinates.substring(i, i + cameraCoordinates.substring(i).indexOf('.'));
+                        var endOfNumber = cameraCoordinates.substring(i + beforeDecimal.length, i + beforeDecimal.length + precision + '.'.length);
+                        coordinates.push(parseFloat(beforeDecimal + endOfNumber));
+                        i += beforeDecimal.length + endOfNumber.length + ':'.length;
                     }
                     else
                     {
-                        mappoints.push(mappoint);
+                        var beforeDecimal =  cameraCoordinates.substring(i, i + cameraCoordinates.substring(i).indexOf('.'));
+                        var endOfNumber = cameraCoordinates.substring(i + beforeDecimal.length, i + beforeDecimal.length + precision + '.'.length);
+                        coordinates.push(parseFloat(beforeDecimal + endOfNumber));
+                        i += beforeDecimal.length + endOfNumber.length + ':'.length;
                     }
                 }
-                insertMapPoints(mappoints);
-                // var mapPoints = [];
-                // var direction = 0;
-                // for (var i = 0; i < distances.length; i += 15) {
-                //     for(var j = 0; j < i+11; j += 5) {
-                //         var mapPoint = {};
-                //         switch(direction){
-                //             case 0:
-                //                 mapPoint.x = parseFloat(distances[i+j]);
-                //                 direction++;
-                //                 break;
-                //             case 1:
-                //                 mapPoint.y = parseFloat();
-                //                 direction++;
-                //                 break;
-                //             case 2:
-                //                 mapPoint.z = parseFloat();
-                //                 direction = 0;
-                //                 break;
-                //             default:
-                //                 break;
-                //         }
-                //     }
 
-                // }
+                var cameraPoint = {};
+                cameraPoint.x = coordinates[0];
+                cameraPoint.y = coordinates[1];
+                cameraPoint.z = coordinates[2];
 
-                // for (var i = 0; i < distances.length; i += 12){
-                //     for(var j = i; j < i+11; j += 4) {
-                //         var data =  [distances[j], distances[j+1], distances[j+2], distances[j+3]];
-                //         var buf = new ArrayBuffer(4);
-                //         var view = new DataView(buf);
-                //         data.forEach(function (b, i) {
-                //             view.setUint8(i, b);
-                //         });
-                //         var num = view.getFloat32(0);
-                //         console.log(num);
-                //         // Done
-                //         console.log(num);
-                //     }
-                // }
-
-
-                // for(var i = 0; i < distances.length; i += 12)
-                // {
-                //     var data =  [distances[i], 226, 157, 10];
-                    
-                //     // Create a buffer
-                //     var buf = new ArrayBuffer(4);
-                //     // Create a data view of it
-                //     var view = new DataView(buf);
-
-                //     // set bytes
-                //     data.forEach(function (b, i) {
-                //         view.setUint8(i, b);
-                //     });
-
-                //     // Read the bits as a float; note that by doing this, we're implicitly
-                //     // converting it from a 32-bit float into JavaScript's native 64-bit double
-                //     var num = view.getFloat32(0);
-                //     // Done
-                //     console.log(num);
-                //     var mapPoint = {};
-                //     for(var j = 0; j < 3; j++)
-                //     {
-                //         var bits = (0xFF & distances[i + j]) << 24 | (0xFF & distances[i + j + 1]) << 16 | (0xFF & distances[i + j + 2]) << 8 | (0xFF & distances[i + j + 3]);
-                //         var sign = ((bits >>> 31) == 0) ? 1.0 : -1.0;
-                //         var e = ((bits >>> 23) & 0xff);
-                //         var m = (e == 0) ? (bits & 0x7fffff) << 1 : (bits & 0x7fffff) | 0x800000;
-                //         var f = sign * m * Math.pow(2, e - 150);
-
-                //         if(j === 0)
-                //         {
-                //             mapPoint.x = f;
-                //         }
-                //         else if(j === 1)
-                //         {
-                //             mapPoint.y = f;
-                //         }
-                //         else if(j === 2)
-                //         {
-                //             mapPoint.z = f;
-                //         }
-                //     }
-                //     console.log(mapPoint);
-                //     mapPoints[i/4] = mapPoint;
-                // }
-
-                //console.log(mapPoints);
-                //insertMapPoints(mapPoints);
+                insertCameraPoints(cameraPoint);
             }
         };
 
