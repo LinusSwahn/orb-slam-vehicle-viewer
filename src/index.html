@@ -243,11 +243,9 @@
     lidarCamera.position.z = 5;
     mapCamera.lookAt (new THREE.Vector3(0, 0, 0));
     lidarCamera.lookAt (new THREE.Vector3(0, 0, 0));
+
     mapScene.add (mapCamera);
     lidarScene.add (lidarCamera);
-
-    var mapControls = new THREE.OrbitControls(mapCamera, mapRenderer.domElement);
-    var lidarControls = new THREE.OrbitControls(lidarCamera, lidarRenderer.domElement);
 
     var mapPointLight = new THREE.PointLight(0xffffff);
     var lidarPointLight = new THREE.PointLight(0xffffff);
@@ -256,13 +254,16 @@
     mapScene.add (mapPointLight);
     lidarScene.add (lidarPointLight);
 
+    var mapControls = new THREE.OrbitControls(mapCamera, mapRenderer.domElement);
+    var lidarControls = new THREE.OrbitControls(lidarCamera, lidarRenderer.domElement);
+
     var mapAmbientLight = new THREE.AmbientLight (0xaaaaaa);
     var lidarAmbientLight = new THREE.AmbientLight (0xaaaaaa);
     mapScene.add(mapAmbientLight);
     lidarScene.add(lidarAmbientLight);
 
     var gridXZ = new THREE.GridHelper(50, 50, 0xff0000, 0x0000ff);
-    lidarScene.add(gridXZ);
+    mapScene.add(gridXZ);
 
     var mapPointGeometry = new THREE.BufferGeometry();
     var carPointGeometry = new THREE.BufferGeometry();
@@ -296,14 +297,14 @@
     var currentIndex = 0;
     var currentCarIndex = 0;
 
-    var animate = function ()
-    {
-        requestAnimationFrame( animate );
-        mapRenderer.render(mapScene, mapCamera);
-        lidarRenderer.render(lidarScene, lidarCamera);
-    };
-
-    animate();
+    // var animate = function ()
+    // {
+    //     requestAnimationFrame( animate );
+    //     mapRenderer.render(mapScene, mapCamera);
+    //     lidarRenderer.render(lidarScene, lidarCamera);
+    // };
+    //
+    // animate();
 
 </script>
 
@@ -315,6 +316,10 @@
         positions[currentCarIndex++] = carPoint.y;
         positions[currentCarIndex++] = carPoint.z;
         carPoints.geometry.attributes.position.needsUpdate = true;
+
+        mapCamera.position.x = carPoint.x;
+        mapCamera.position.y = carPoint.y + 10;
+        mapCamera.position.z = carPoint.z;
     };
 
     var insertMapPoints = function(mapPoints)
@@ -352,10 +357,9 @@
         lidarPointCloud.geometry.attributes.position.needsUpdate = true;
     };
 
-    var updateLidarGrid = function(cameraRotation)
+    var updateLidarRotation = function(cameraRotation)
     {
-        gridXZ.rotation = cameraRotation;
-        console.log(lidarCamera);
+
     };
 
     var floatArrayFromString = function(inString, precision, delimiter){
@@ -470,7 +474,9 @@
                 insertMapPoints(mapPointsFromMap);
 
                 updateLidar(cameraPoint, mapPointsFromMap);
-                updateLidarGrid(cameraRotation)
+                updateLidarRotation(cameraRotation);
+                mapRenderer.render(mapScene, mapCamera);
+                lidarRenderer.render(lidarScene, lidarCamera);
             }
             if (data.dataType == 49)
             {
