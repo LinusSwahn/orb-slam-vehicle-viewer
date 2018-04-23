@@ -350,7 +350,13 @@
             }
         }
         lidarPointCloud.geometry.attributes.position.needsUpdate = true;
-    }
+    };
+
+    var updateLidarGrid = function(cameraRotation)
+    {
+        gridXZ.rotation = cameraRotation;
+        console.log(lidarCamera);
+    };
 
     var floatArrayFromString = function(inString, precision, delimiter){
         var mapCoordinatesParsed = [];
@@ -446,18 +452,25 @@
                 // CompactPointCloud
                 var mapCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.mapCoordinates);
                 var cameraCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.cameraCoordinates);
+                var cameraRotationRaw = window.atob(data.opendlv_proxy_OrbslamMap.cameraRotation);
 
                 var mapCoordinatesParsed = floatArrayFromString(mapCoordinatesRaw, 4, ':');
                 var cameraCoordinatesParsed = floatArrayFromString(cameraCoordinatesRaw, 4, ':');
+                var cameraRotationParsed = floatArrayFromString(cameraRotationRaw, 4, ':');
                 var mapPointsFromMap = mapPointsArrayFromFloatArray(mapCoordinatesParsed);
 
                 var cameraPoint = new THREE.Vector3(cameraCoordinatesParsed[0], cameraCoordinatesParsed[1], cameraCoordinatesParsed[2]);
+                var cameraRadianRotation = new THREE.Vector3(cameraRotationParsed[0], cameraRotationParsed[1], cameraRotationParsed[2]);
+                var cameraRotation = new THREE.Vector3(THREE.Math.radToDeg(cameraRadianRotation.x),
+                                                    THREE.Math.radToDeg(cameraRadianRotation.y),
+                                                    THREE.Math.radToDeg(cameraRadianRotation.z));
 
                 insertCameraPoints(cameraPoint);
 
                 insertMapPoints(mapPointsFromMap);
 
                 updateLidar(cameraPoint, mapPointsFromMap);
+                updateLidarGrid(cameraRotation)
             }
             if (data.dataType == 49)
             {
