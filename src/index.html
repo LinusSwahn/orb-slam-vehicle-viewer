@@ -154,47 +154,39 @@
             </div>
         </div>
         <div class="col-xs-12 col-md-2 d-flex flex-column justify-content-center">
-             
-                    <div class="card">
-                            <div class="card-body">
-                                <center>
-                                    <i id="connectionStatusSymbol" class="fa fa-taxi" style="font-size:30px;color:#555"></i>
-                                    <div id="connectionStatusText">disconnected</div>
-                                </center>
-                            </div>
-                          </div>
-                          currentIndex <div class="card">
-                                <div class="card-body">
-                                        <center>
-                                                <canvas id="speed"></canvas>
-                                                </center>
-                                </div>
-                              </div>
-                    <div class="card">
-                            <div class="card-body">
-                                    <center>
-                                            <div id="map"></div>
-                                            </center>
-                            </div>
-                        </div>
-                        <div class="card">
-                                <div class="card-body">
-                                        <center>
-                                                <canvas id="cpu-load" width="220" height="100"></canvas>
-                                                </center>
-                                </div>
-                              </div>
-                    
+            <div class="card">
+                <div class="card-body">
+                    <center>
+                        <i id="connectionStatusSymbol" class="fa fa-taxi" style="font-size:30px;color:#555"></i>
+                        <div id="connectionStatusText">disconnected</div>
+                    </center>
+                </div>
+            </div>
+            currentIndex
+            <div class="card">
+                <div class="card-body">
+                    <center>
+                        <canvas id="speed"></canvas>
+                    </center>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <center>
+                        <div id="map"></div>
+                    </center>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <center>
+                        <canvas id="cpu-load" width="220" height="100"></canvas>
+                    </center>
+                </div>
+            </div>
         </div>
     </div>
-
-
-   
 </div>
-
-
-
-
 
 </body>
 
@@ -203,24 +195,12 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 <script>
-
+    var originalCameraRotation = new THREE.Vector3(0, 0, 0);
 </script>
 
 <script>
-
     var mapScene = new THREE.Scene();
     var lidarScene = new THREE.Scene();
-
-    // var car;
-    //
-    // var loadingManager = new THREE.LoadingManager( function() {
-    //     lidarScene.add( car );
-    // } );
-    // // collada
-    // var loader = new THREE.ColladaLoader( loadingManager );
-    // loader.load( 'car.dae', function ( collada ) {
-    //     car = collada.scene;
-    // } );
 
     var mapRenderer = new THREE.WebGLRenderer();
     var lidarRenderer = new THREE.WebGLRenderer();
@@ -316,9 +296,9 @@
     var insertCameraPoints = function(cameraPoint)
     {
         var positions = cameraPoints.geometry.attributes.position.array;
-        positions[currentCarIndex++] = cameraPoint.x;
-        positions[currentCarIndex++] = cameraPoint.y;
-        positions[currentCarIndex++] = cameraPoint.z;
+        positions[currentCarIndex++] = -cameraPoint.x;
+        positions[currentCarIndex++] = -cameraPoint.y;
+        positions[currentCarIndex++] = -cameraPoint.z;
         cameraPoints.geometry.attributes.position.needsUpdate = true;
     };
 
@@ -327,9 +307,9 @@
         var positions = mapPointCloud.geometry.attributes.position.array;
         for(var i in mapPoints)
         {
-            positions[currentIndex++] = mapPoints[i].x;
-            positions[currentIndex++] = mapPoints[i].y;
-            positions[currentIndex++] = mapPoints[i].z;
+            positions[currentIndex++] = -mapPoints[i].x;
+            positions[currentIndex++] = -mapPoints[i].y;
+            positions[currentIndex++] = -mapPoints[i].z;
         }
         mapPointCloud.geometry.attributes.position.needsUpdate = true;
     };
@@ -348,9 +328,9 @@
         {
             var mapPoint = new THREE.Vector3(mapPositions[i], mapPositions[i + 1], mapPositions[i + 2]);
 
-            lidarPositions[lidarIndex++] = mapPoint.x - carPoint.x;
-            lidarPositions[lidarIndex++] = mapPoint.y - carPoint.y;
-            lidarPositions[lidarIndex++] = mapPoint.z - carPoint.z;
+            lidarPositions[lidarIndex++] = mapPoint.x + carPoint.x;
+            lidarPositions[lidarIndex++] = mapPoint.y + carPoint.y;
+            lidarPositions[lidarIndex++] = mapPoint.z + carPoint.z;
         }
 
         var mapCarPositions = cameraPoints.geometry.attributes.position.array;
@@ -358,9 +338,9 @@
         {
             var mapCarPoint = new THREE.Vector3(mapCarPositions[j], mapCarPositions[j + 1], mapCarPositions[j + 2]);
 
-            carPositions[carIndex++] = mapCarPoint.x - carPoint.x;
-            carPositions[carIndex++] = mapCarPoint.y - carPoint.y;
-            carPositions[carIndex++] = mapCarPoint.z - carPoint.z;
+            carPositions[carIndex++] = carPoint.x;
+            carPositions[carIndex++] = carPoint.y;
+            carPositions[carIndex++] = carPoint.z;
         }
 
         lidarPointCloud.geometry.attributes.position.needsUpdate = true;
@@ -427,6 +407,7 @@
             console.log("Loaded " + __libcluon.setMessageSpecification(odvd) + " messages from specification.");
         };
 
+        var gotOriginalCameraRotation = false;
 
         var oldTimeStamp = 0;
         ws.onmessage = function(evt)
@@ -475,9 +456,7 @@
                                                     THREE.Math.radToDeg(cameraRadianRotation.z));
 
                 insertCameraPoints(cameraPoint);
-
                 insertMapPoints(mapPointsFromMap);
-
                 updateLidar(cameraPoint, mapPointsFromMap);
             }
             if (data.dataType == 49)
