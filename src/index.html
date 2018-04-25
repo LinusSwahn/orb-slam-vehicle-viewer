@@ -162,7 +162,14 @@
                     </center>
                 </div>
             </div>
-            currentIndex
+            <div class="card">
+                <div class="card-body">
+                    <center>
+                        <i id="updates-per-second" class="fa fa-taxi" style="font-size:30px;color:#555"></i>
+                        <div id="updates-per-second-text">0 updates per second</div>
+                    </center>
+                </div>
+            </div>
             <div class="card">
                 <div class="card-body">
                     <center>
@@ -216,6 +223,8 @@
 
     var mapCamera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     var lidarCamera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+    var update_time_stamps = [];
 
     mapCamera.position.y = -5;
     lidarCamera.position.y = -5;
@@ -439,6 +448,13 @@
             }
             if (data.dataType == 1193)
             {
+                update_time_stamps.push(Date.now());
+                if( update_time_stamps.length > 1) {
+                    console.log((update_time_stamps[update_time_stamps.length-1] - update_time_stamps[0] ) / 1000);
+                    var updates_per_second = update_time_stamps.length / ( ( update_time_stamps[update_time_stamps.length-1] - update_time_stamps[0] ) / 1000 );
+                    document.getElementById("updates-per-second-text").innerHTML = String(updates_per_second.toFixed(2) + " updates per second");
+                }
+                
                 // CompactPointCloud
                 var mapCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.mapCoordinates);
                 var cameraCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.cameraCoordinates);
