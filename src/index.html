@@ -49,7 +49,6 @@
             }
             .content {
                 min-height: 80vh;
-                max-height: 90vh;
             }
             .main {
               float:left;
@@ -113,7 +112,12 @@
               overflow: auto;
               position: relative;
             }
-
+            @media only screen and (min-width: 1100px) {
+                .content {
+                min-height: 80vh;
+                max-height: 90vh;
+            }
+            }
             @media only screen and (max-width:800px) {
               /* For tablets: */
               .main {
@@ -143,13 +147,13 @@
         </div>
     </div>
     <div class="row content">
-        <div id="orbMapContainer" class="col-10 col-md-4 col-xl-5 d-flex justify-content-center">
+        <div id="orbMapContainer" class="col-12 col-md-4 col-xl-5">
             <div id="orb-map"></div>
         </div>
-        <div id="tdMapContainer" class="col-10 col-md-4 col-xl-5 d-flex justify-content-center">
+        <div id="tdMapContainer" class="col-12 col-md-4 col-xl-5">
             <div id="3d-map"></div>
         </div>
-        <div class="col-xs-12 col-md-2 col-xl-2 d-flex flex-column justify-content-center">
+        <div class="col-12 col-md-2 col-xl-2 d-flex flex-column justify-content-center">
             <div class="card">
                 <div class="card-body">
                     <center>
