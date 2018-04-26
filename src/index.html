@@ -2,6 +2,7 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
 <!--
         <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
         <link type="text/css" rel="stylesheet" href="https://unpkg.com/maptalks/dist/maptalks.css"/>
@@ -30,22 +31,26 @@
 
         <style>
             body, html {
-                height: 100%;
                 margin: 0;
+                font-family: 'Roboto', sans-serif!important;
             }
-
+            Connected
             * {
               box-sizing: border-box;
             }
 
             .bg {
-                background-image: url("car.jpg");
+                /* background-image: url("car.jpg");
                 height: 100%;
                 background-position: center;
                 background-repeat: no-repeat;
-                background-size: cover;
+                background-size: cover; */
+                background: white;
             }
-
+            .content {
+                min-height: 80vh;
+                max-height: 90vh;
+            }
             .main {
               float:left;
               width:70%;
@@ -82,7 +87,7 @@
             }
             .module > header > h1 {
               margin: 0;
-              font-family: Awesome;
+              
               color: white;
               position: relative;
               z-index: 1;
@@ -92,11 +97,12 @@
               background: #444;
               padding: 1em;
               margin-top: 20px;
-              font-family: Awesome;
+              
               color: white;
               font-size: 10px;
               pointer-events: none;
             }
+
 
             #map { width: 220px; height: 220px;  }
 
@@ -129,36 +135,26 @@
 <body class="bg" style="font-family:Awesome;">
 
 <div class="container-fluid">
-    <div class="row py-5">
+    <div class="row py-4">
         <div class="col-12 d-flex justify-content-center">
-            <h1 style="color:white;">Vehicle view</h1>
+            
+            <h1 style="color:black;">Orb-Slam Visualizer</h1>
+            
         </div>
     </div>
-    <div class="row ">
-        <div class="col-xs-12 col-md-5 d-flex justify-content-center">
-            <div class="main">
-                <div class="elementNoShadow">
-                    <center>
-                        <div id="lidar"></div>
-                    </center>
-                </div>
-            </div>
+    <div class="row content">
+        <div id="orbMapContainer" class="col-10 col-md-4 col-xl-5 d-flex justify-content-center">
+            <div id="orb-map"></div>
         </div>
-        <div class="col-xs-12 col-md-5 d-flex justify-content-center">
-            <div class="main">
-                <div class="elementNoShadow">
-                    <center>
-                        <div id="3d-map"></div>
-                    </center>
-                </div>
-            </div>
+        <div id="tdMapContainer" class="col-10 col-md-4 col-xl-5 d-flex justify-content-center">
+            <div id="3d-map"></div>
         </div>
-        <div class="col-xs-12 col-md-2 d-flex flex-column justify-content-center">
+        <div class="col-xs-12 col-md-2 col-xl-2 d-flex flex-column justify-content-center">
             <div class="card">
                 <div class="card-body">
                     <center>
                         <i id="connectionStatusSymbol" class="fa fa-taxi" style="font-size:30px;color:#555"></i>
-                        <div id="connectionStatusText">disconnected</div>
+                        <div id="connectionStatusText">Disconnected</div>
                     </center>
                 </div>
             </div>
@@ -167,27 +163,6 @@
                     <center>
                         <i id="updates-per-second" class="fa fa-taxi" style="font-size:30px;color:#555"></i>
                         <div id="updates-per-second-text">0 updates per second</div>
-                    </center>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <center>
-                        <canvas id="speed"></canvas>
-                    </center>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <center>
-                        <div id="map"></div>
-                    </center>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <center>
-                        <canvas id="cpu-load" width="220" height="100"></canvas>
                     </center>
                 </div>
             </div>
@@ -212,14 +187,21 @@
     var mapRenderer = new THREE.WebGLRenderer();
     var lidarRenderer = new THREE.WebGLRenderer();
 
-    mapRenderer.setSize( 700, 500 );
-    lidarRenderer.setSize( 700, 500 );
+    orbMapContainer = document.getElementById('orbMapContainer');
+    tdMapContainer = document.getElementById('tdMapContainer');
+    mapRenderer.setSize($(orbMapContainer).width(), $(orbMapContainer).height());
+    orbMapContainer.appendChild(mapRenderer.domElement);
+    lidarRenderer.setSize($(tdMapContainer).width(), $(tdMapContainer).height());
+    tdMapContainer.appendChild(lidarRenderer.domElement);
+    
+    // mapRenderer.setSize( 700, 500 );
+    // lidarRenderer.setSize( 700, 500 );
 
     mapRenderer.setClearColor(new THREE.Color(0x00000000));
     lidarRenderer.setClearColor(new THREE.Color(0x00000000));
 
     document.getElementById('3d-map').appendChild(mapRenderer.domElement);
-    document.getElementById('lidar').appendChild(lidarRenderer.domElement);
+    document.getElementById('orb-map').appendChild(lidarRenderer.domElement);
 
     var mapCamera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     var lidarCamera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
@@ -411,7 +393,7 @@
             console.log("Connected...");
             document.getElementById("connectionStatusSymbol").style.color = "#3CB371";
             document.getElementById("connectionStatusText").style.color = "#3CB371";
-            document.getElementById("connectionStatusText").innerHTML = "connected";
+            document.getElementById("connectionStatusText").innerHTML = "Connected";
             var odvd = getResourceFrom("opendlv-standard-message-set-v0.9.1.odvd");
             console.log("Loaded " + __libcluon.setMessageSpecification(odvd) + " messages from specification.");
         };
@@ -425,16 +407,16 @@
             var data = JSON.parse(__libcluon.decodeEnvelopeToJSON(evt.data));
             if (data.dataType > 0)
             {
-                if (oldTimeStamp == 0)
-                {
-                    oldTimeStamp = data.sampleTimeStamp.seconds * 1000 * 1000 + data.sampleTimeStamp.microseconds;
-                }
-                else
-                {
-                    var currentTimeStamp = data.sampleTimeStamp.seconds * 1000 * 1000 + data.sampleTimeStamp.microseconds;
-                    dataLine.append(new Date().getTime(), Math.abs(currentTimeStamp - oldTimeStamp));
-                    oldTimeStamp = currentTimeStamp;
-                }
+                // if (oldTimeStamp == 0)
+                // {
+                //     oldTimeStamp = data.sampleTimeStamp.seconds * 1000 * 1000 + data.sampleTimeStamp.microseconds;
+                // }
+                // else
+                // {
+                //     var currentTimeStamp = data.sampleTimeStamp.seconds * 1000 * 1000 + data.sampleTimeStamp.microseconds;
+                //     dataLine.append(new Date().getTime(), Math.abs(currentTimeStamp - oldTimeStamp));
+                //     oldTimeStamp = currentTimeStamp;
+                // }
             }
 
             if (data.dataType == 1046)
@@ -560,119 +542,119 @@
 </script>
 
 <script>
-var gaugePS = new RadialGauge({
-    renderTo: 'speed',
-   units: "kph",
-    minValue: 0,
-    maxValue: 220,
-    majorTicks: [
-        "0",
-        "20",
-        "40",
-        "60",
-        "80",
-        "100",
-        "120",
-        "140",
-        "160",
-        "180",
-        "200",
-        "220"
-    ],
-    minorTicks: 2,
-    strokeTicks: true,
-    highlights: [
-        {
-            "from": 160,
-            "to": 220,
-            "color": "rgba(200, 50, 50, .75)"
-        }
-    ],
-    colorPlate: "#fff",
-    borderShadowWidth: 0,
-    borders: false,
-    needleType: "arrow",
-    needleWidth: 2,
-    needleCircleSize: 7,
-    needleCircleOuter: true,
-    needleCircleInner: false,
-    animationDuration: 1500,
-    animationRule: "linear"
-});
-gaugePS.draw();
+// var gaugePS = new RadialGauge({
+//     renderTo: 'speed',
+//    units: "kph",
+//     minValue: 0,
+//     maxValue: 220,
+//     majorTicks: [
+//         "0",
+//         "20",
+//         "40",
+//         "60",
+//         "80",
+//         "100",
+//         "120",
+//         "140",
+//         "160",
+//         "180",
+//         "200",
+//         "220"
+//     ],
+//     minorTicks: 2,
+//     strokeTicks: true,
+//     highlights: [
+//         {
+//             "from": 160,
+//             "to": 220,
+//             "color": "rgba(200, 50, 50, .75)"
+//         }
+//     ],
+//     colorPlate: "#fff",
+//     borderShadowWidth: 0,
+//     borders: false,
+//     needleType: "arrow",
+//     needleWidth: 2,
+//     needleCircleSize: 7,
+//     needleCircleOuter: true,
+//     needleCircleInner: false,
+//     animationDuration: 1500,
+//     animationRule: "linear"
+// });
+// gaugePS.draw();
 //gaugePS.value = "510";
 </script>
 
 
 <script>
-    var dataLine = new TimeSeries();
+    // var dataLine = new TimeSeries();
 
-    var chart = new SmoothieChart({millisPerPixel:100,grid:{millisPerLine:3000,fillStyle:'#eee'},tooltip:true,maxValue:1000.0*1000.0,minValue:0}),
-        canvas = document.getElementById('cpu-load'),
-        line1 = dataLine;
+    // var chart = new SmoothieChart({millisPerPixel:100,grid:{millisPerLine:3000,fillStyle:'#eee'},tooltip:true,maxValue:1000.0*1000.0,minValue:0}),
+    //     canvas = document.getElementById('cpu-load'),
+    //     line1 = dataLine;
 
-        chart.addTimeSeries(line1, {lineWidth:2,strokeStyle:'rgba(20,20,20,0.55)',fillStyle:'rgba(123,41,0,0.30)'});
-        chart.streamTo(canvas, 1237);
+    //     chart.addTimeSeries(line1, {lineWidth:2,strokeStyle:'rgba(20,20,20,0.55)',fillStyle:'rgba(123,41,0,0.30)'});
+    //     chart.streamTo(canvas, 1237);
 
-    // Add to SmoothieChart
-    chart.addTimeSeries(dataLine);
+    // // Add to SmoothieChart
+    // chart.addTimeSeries(dataLine);
 </script>
 
 
 <script>
-var map = new maptalks.Map("map",{
-    center : [-118.150127,33.779397],
-    pitch : 0,
-    bearing : 0,
-    zoom : 14,
-    centerCross: true,
-    attribution : {
-      'content' : '<span style="padding:4px"><font size=1>&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a></font> </span>'
-    },
-// a custom version of default web-mercator spatial reference
-        // map's spatial reference definition
-        spatialReference : {
-          projection : 'EPSG:3857', // geo projection, can be a string or a function
-          resolutions : [           // map's zoom levels and resolutions
-            156543.03392804097,
-            78271.51696402048,
-            9135.75848201024,
-            19567.87924100512,
-            9783.93962050256,
-            4891.96981025128,
-            2445.98490512564,
-            1222.99245256282,
-            611.49622628141,
-            305.748113140705,
-            152.8740565703525,
-            76.43702828517625,
-            38.21851414258813,
-            19.109257071294063,
-            9.554628535647032,
-            4.777314267823516,
-            2.388657133911758,
-            1.194328566955879,
-            0.5971642834779395,
-            0.29858214173896974,
-            0.1492910709,
-            0.07464553543,
-            0.03732276771
-          ],
-          fullExtent : {         // map's full extent
-            'top': 6378137 * Math.PI,
-            'left': -6378137 * Math.PI,
-            'bottom': -6378137 * Math.PI,
-            'right': 6378137 * Math.PI
-          }
-        },
-        baseLayer : new maptalks.TileLayer('base',{
-          urlTemplate: 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          subdomains: ['a','b','c','d'],
-          tileSystem : [1, -1, -20037508.34, 20037508.34], // tile system
-          minZoom : 1,
-          maxZoom : 23
-        })
-});
+// var map = new maptalks.Map("map",{
+//     center : [-118.150127,33.779397],
+//     pitch : 0,
+//     bearing : 0,
+//     zoom : 14,
+//     centerCross: true,
+//     attribution : {
+//       'content' : '<span style="padding:4px"><font size=1>&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a></font> </span>'
+//     },
+// // a custom version of default web-mercator spatial reference
+//         // map's spatial reference definition
+//         spatialReference : {
+//           projection : 'EPSG:3857', // geo projection, can be a string or a function
+//           resolutions : [           // map's zoom levels and resolutions
+//             156543.03392804097,
+//             78271.51696402048,
+//             9135.75848201024,
+//             19567.87924100512,
+//             9783.93962050256,
+//             4891.96981025128,
+//             2445.98490512564,
+//             1222.99245256282,
+//             611.49622628141,
+//             305.748113140705,
+//             152.8740565703525,
+//             76.43702828517625,
+//             38.21851414258813,
+//             19.109257071294063,
+//             9.554628535647032,
+//             4.777314267823516,
+//             2.388657133911758,
+//             1.194328566955879,
+//             0.5971642834779395,
+//             0.29858214173896974,
+//             0.1492910709,
+//             0.07464553543,
+//             0.03732276771
+//           ],
+//           fullExtent : {         // map's full extent
+//             'top': 6378137 * Math.PI,
+//             'left': -6378137 * Math.PI,
+//             'bottom': -6378137 * Math.PI,
+//             'right': 6378137 * Math.PI
+//           }
+//         },
+//         baseLayer : new maptalks.TileLayer('base',{
+//           urlTemplate: 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+//           subdomains: ['a','b','c','d'],
+//           tileSystem : [1, -1, -20037508.34, 20037508.34], // tile system
+//           minZoom : 1,
+//           maxZoom : 23
+//         })
+// });
 </script>
 
 
