@@ -1,12 +1,12 @@
 {
-    "title": "Opendlv-orb2slam-viewer",
-    "name": "Opendlv-orb2slam-viewer",
+    "title": "opendlv-orb2slam-viewer",
+    "name": "opendlv-orb2slam-viewer",
     "version": "1.0.0",
     "description": "Opendlv-orb2slam-viewer component",
     "keywords": [
         "slam"
     ],
-    "license": "GPLV2",
+    "license": "GPL-3.0",
     "dependencies": {
         "babel-core": "^6.26.0",
         "babel-preset-es2015": "^6.24.1",
