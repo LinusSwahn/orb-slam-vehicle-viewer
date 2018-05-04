@@ -1,0 +1,107 @@
+body, html {
+    margin: 0;
+    font-family: "Roboto", sans-serif !important;
+  }
+  
+  Connected * {
+    box-sizing: border-box;
+  }
+  
+  .bg {
+    /* background-image: url("car.jpg");
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover; */
+    background: white;
+  }
+  
+  .content {
+    min-height: 80vh;
+  }
+  
+  .main {
+    float: left;
+    width: 70%;
+    padding: 2px 2px;
+    margin-top: 10px;
+    margin-left: 10px;
+  }
+  
+  .right {
+    float: right;
+    width: 20%;
+    padding: 2px 2px;
+    margin-top: 10px;
+    margin-left: 10px;
+  }
+  
+  .element {
+    margin-top: 10px;
+    margin-left: 10px;
+    box-shadow: 3px 3px 3px #aaaaaa;
+  }
+  
+  .elementNoShadow {}
+  
+  .module > header {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 10px;
+    background: inherit;
+    background-attachment: fixed;
+    > h1 {
+      margin: 0;
+      color: white;
+      position: relative;
+      z-index: 1;
+    }
+  }
+  
+  div.smoothie-chart-tooltip {
+    background: #444;
+    padding: 1em;
+    margin-top: 20px;
+    color: white;
+    font-size: 10px;
+    pointer-events: none;
+  }
+  
+  #map {
+    width: 220px;
+    height: 220px;
+  }
+  
+  ul.fancytree-container {
+    margin: 4px;
+    width: 300px;
+    height: 200px;
+    overflow: auto;
+    position: relative;
+  }
+  
+  @media only screen and (min-width: 1100px) {
+    .content {
+      min-height: 80vh;
+      max-height: 90vh;
+    }
+  }
+  
+  @media only screen and (max-width: 800px) {
+    /* For tablets: */
+    .main {
+      width: 80%;
+    }
+    .right {
+      width: 100%;
+    }
+  }
+  
+  @media only screen and (max-width: 500px) {
+    /* For mobile phones: */
+    .main, .right {
+      width: 100%;
+    }
+  }
