@@ -25,8 +25,8 @@ lidarRenderer.setClearColor(new THREE.Color(0x00000000));
 document.getElementById('3d-map').appendChild(mapRenderer.domElement);
 document.getElementById('orb-map').appendChild(lidarRenderer.domElement);
 
-var mapCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-var lidarCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+var mapCamera = new THREE.PerspectiveCamera(75, $(orbMapContainer).width() / $(orbMapContainer).height(), 0.1, 10000);
+var lidarCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 
 var update_time_stamps = [];
 
@@ -44,7 +44,11 @@ lidarPointLight.position.set(0, 20, 20);
 mapScene.add(mapPointLight);
 lidarScene.add(lidarPointLight);
 
-var mapControls = new THREE.OrbitControls(mapCamera, mapRenderer.domElement);
+var mapControls = new THREE.FlyControls(mapCamera, mapRenderer.domElement);
+mapControls.autoForward = false;
+mapControls.dragToLook = true;
+mapControls.movementSpeed = 1;
+mapControls.rollSpeed = 0.05;
 var lidarControls = new THREE.OrbitControls(lidarCamera, lidarRenderer.domElement);
 
 var mapAmbientLight = new THREE.AmbientLight(0xaaaaaa);
@@ -56,37 +60,51 @@ lidarScene.add(lidarAmbientLight);
 // lidarScene.add(gridXZ);
 
 var mapPointGeometry = new THREE.BufferGeometry();
+var mapPointGeometry1 = new THREE.BufferGeometry();
+var mapPointGeometry2 = new THREE.BufferGeometry();
 var carPointGeometry = new THREE.BufferGeometry();
 var lidarPointGeometry = new THREE.BufferGeometry();
 var lidarCarPointGeometry = new THREE.BufferGeometry();
-var MAX_POINTS = 150000;
+var MAX_POINTS = 1000000;
 
 var mapPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per
-var carPositions = new Float32Array(3000 * 3); // 3 vertices per
+var mapPositions1 = new Float32Array(MAX_POINTS * 3); // 3 vertices per
+var mapPositions2 = new Float32Array(MAX_POINTS * 3); // 3 vertices per
+var carPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per
 var lidarPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
 var lidarCarPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
 
 mapPositions.fill(0);
+mapPositions1.fill(0);
+mapPositions2.fill(0);
 carPositions.fill(0);
 lidarPositions.fill(0);
 lidarCarPositions.fill(0);
 
 mapPointGeometry.addAttribute('position', new THREE.BufferAttribute(mapPositions, 3));
+mapPointGeometry1.addAttribute('position', new THREE.BufferAttribute(mapPositions1, 3));
+mapPointGeometry2.addAttribute('position', new THREE.BufferAttribute(mapPositions2, 3));
 carPointGeometry.addAttribute('position', new THREE.BufferAttribute(carPositions, 3));
 lidarPointGeometry.addAttribute('position', new THREE.BufferAttribute(lidarPositions, 3));
 lidarCarPointGeometry.addAttribute('position', new THREE.BufferAttribute(lidarCarPositions, 3));
 
 var mapMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.02 });
-var carMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 0.1 });
+var mapMaterial1 = new THREE.PointsMaterial({ color: 0xdddddd, size: 0.02 });
+var mapMaterial2 = new THREE.PointsMaterial({ color: 0xaaaaaa, size: 0.02 });
+var carMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 0.4 });
 var lidarMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.02 });
 var lidarCarMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 0.05 });
 
 var mapPointCloud = new THREE.Points(mapPointGeometry, mapMaterial);
+var mapPointCloud1 = new THREE.Points(mapPointGeometry1, mapMaterial1);
+var mapPointCloud2 = new THREE.Points(mapPointGeometry2, mapMaterial2);
 var cameraPoints = new THREE.Points(carPointGeometry, carMaterial);
 var lidarPointCloud = new THREE.Points(lidarPointGeometry, lidarMaterial);
 var lidarCarPointCloud = new THREE.Points(lidarCarPointGeometry, lidarCarMaterial);
 
 mapScene.add(mapPointCloud);
+mapScene.add(mapPointCloud1);
+mapScene.add(mapPointCloud2);
 mapScene.add(cameraPoints);
 lidarScene.add(lidarPointCloud);
 lidarScene.add(lidarCarPointCloud);
@@ -94,10 +112,12 @@ lidarScene.add(lidarCarPointCloud);
 var currentIndex = 0;
 var currentCarIndex = 0;
 
-var animate = function () {
+var animate = function ()
+{
     requestAnimationFrame(animate);
     mapRenderer.render(mapScene, mapCamera);
     lidarRenderer.render(lidarScene, lidarCamera);
+    mapControls.update(1);
 };
 
 animate();
@@ -107,20 +127,45 @@ animate();
 
 var insertCameraPoints = function (cameraPoint) {
     var positions = cameraPoints.geometry.attributes.position.array;
-    positions[currentCarIndex++] = -cameraPoint.x;
-    positions[currentCarIndex++] = -cameraPoint.y;
-    positions[currentCarIndex++] = -cameraPoint.z;
+    positions[currentCarIndex++] = cameraPoint.x;
+    positions[currentCarIndex++] = cameraPoint.y;
+    positions[currentCarIndex++] = cameraPoint.z;
     cameraPoints.geometry.attributes.position.needsUpdate = true;
 };
 
-var insertMapPoints = function (mapPoints) {
+var insertMapPoints = function (mapPoints)
+{
     var positions = mapPointCloud.geometry.attributes.position.array;
-    for (var i in mapPoints) {
-        positions[currentIndex++] = -mapPoints[i].x;
-        positions[currentIndex++] = -mapPoints[i].y;
-        positions[currentIndex++] = -mapPoints[i].z;
+    if(currentIndex === 0)
+    {
+        positions.fill(0);
     }
-    mapPointCloud.geometry.attributes.position.needsUpdate = true;
+    for (var i in mapPoints)
+    {
+        // if(currentIndex >= 36000 * 3)
+        // {
+        //     var positions2 = mapPointCloud2.geometry.attributes.position.array;
+        //     positions2[currentIndex++ - 36000 * 3] = mapPoints[i].x;
+        //     positions2[currentIndex++ - 36000 * 3] = mapPoints[i].y;
+        //     positions2[currentIndex++ - 36000 * 3] = mapPoints[i].z;
+        //     mapPointCloud2.geometry.attributes.position.needsUpdate = true;
+        // }
+        // else if(currentIndex >= 15000 * 3)
+        // {
+        //     var positions1 = mapPointCloud1.geometry.attributes.position.array;
+        //     positions1[currentIndex++ - 15000 * 3] = mapPoints[i].x;
+        //     positions1[currentIndex++ - 15000 * 3] = mapPoints[i].y;
+        //     positions1[currentIndex++ - 15000 * 3] = mapPoints[i].z;
+        //     mapPointCloud1.geometry.attributes.position.needsUpdate = true;
+        // }
+        // else
+        {
+            positions[currentIndex++] = mapPoints[i].x;
+            positions[currentIndex++] = mapPoints[i].y;
+            positions[currentIndex++] = mapPoints[i].z;
+            mapPointCloud.geometry.attributes.position.needsUpdate = true;
+        }
+    }
 };
 
 var updateLidar = function (carPoint) {
@@ -235,14 +280,18 @@ if ("WebSocket" in window) {
         }
         if (data.dataType == 1193) {
             update_time_stamps.push(Date.now());
-            if (update_time_stamps.length > 1) {
-                console.log((update_time_stamps[update_time_stamps.length - 1] - update_time_stamps[0]) / 1000);
+            if (update_time_stamps.length > 1)
+            {
                 var updates_per_second = update_time_stamps.length / ((update_time_stamps[update_time_stamps.length - 1] - update_time_stamps[0]) / 1000);
                 document.getElementById("updates-per-second-text").innerHTML = String(updates_per_second.toFixed(2) + " updates per second");
             }
 
             // CompactPointCloud
             var mapCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.mapCoordinates);
+            var newIndex = data.opendlv_proxy_OrbslamMap.mapCoordinateIndex * 3;
+
+            currentIndex = newIndex;
+
             var cameraCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.cameraCoordinates);
             var cameraRotationRaw = window.atob(data.opendlv_proxy_OrbslamMap.cameraRotation);
 
