@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
+   
+
+    <link type="text/css" rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="vendor/font-awesome/css/font-awesome.min.css" />
+    <!--build:css css/styles.min.css-->
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <!--endbuild-->
+
+
+</head>
+
+<body class="bg" style="font-family:Awesome;">
+
+    <div class="container-fluid">
+        <div class="row py-4">
+            <div class="col-12 d-flex justify-content-center">
+
+                <h1 style="color:black;">Orb-Slam Visualizer</h1>
+
+            </div>
+        </div>
+        <div class="row content">
+            <div id="orbMapContainer" class="col-12 col-md-4 col-xl-5">
+                <div id="orb-map"></div>
+            </div>
+            <div id="tdMapContainer" class="col-12 col-md-4 col-xl-5">
+                <div id="3d-map"></div>
+            </div>
+            <div class="col-12 col-md-2 col-xl-2 d-flex flex-column justify-content-center">
+                <div class="card">
+                    <div class="card-body">
+                        <center>
+                            <i id="connectionStatusSymbol" class="fa fa-plug" style="font-size:30px;color:#555"></i>
+                            <div id="connectionStatusText">Disconnected</div>
+                        </center>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <center>
+                            <i id="updates-per-second" class="fa fa-spinner fa-spin" style="font-size:30px;color:#555"></i>
+                            <div id="updates-per-second-text">0 updates per second</div>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script src="vendor/three/build/three.min.js"></script>
+<script src="vendor/jquery/jquery.slim.min.js"></script>
+<script src="vendor/popper.js/umd/popper.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="js/libcluon-0.0.51.js"></script>
+<!--build:js js/main.min.js -->
+<script type="text/javascript" src="js/OrbitControls.js"></script>
+<script type="text/javascript" src="js/FlyControls.js"></script>
+<script type="text/javascript" src="js/FirstPersonControls.js"></script>
+<script type="text/javascript" src="js/orb2slam-viewer.js"></script>
+<!-- endbuild -->
+
+</html>

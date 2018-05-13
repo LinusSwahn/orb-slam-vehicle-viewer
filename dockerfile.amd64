@@ -1,0 +1,48 @@
+# Copyright (C) 2018  Christian Berger
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+FROM httpd:latest as builder
+MAINTAINER Pontus Pohl "pontus.pohl@gmail.com"
+RUN apt-get update && apt-get -y install wget
+
+WORKDIR /opt
+
+RUN wget https://yarnpkg.com/latest.tar.gz
+RUN mkdir yarn \
+&& tar -zxf latest.tar.gz -C $(pwd)/yarn --strip 1
+ENV PATH "$PATH:/opt/yarn/bin"
+
+RUN wget https://nodejs.org/download/release/v9.8.0/node-v9.8.0-linux-x64.tar.gz
+RUN mkdir node \
+&& tar -zxf /opt/node-v9.8.0-linux-x64.tar.gz  -C node --strip=1 && ls node
+
+ENV PATH "$PATH:/opt/node/bin"
+
+WORKDIR /usr/local/apache2/htdocs
+
+COPY . .
+
+RUN yarn install && yarn global add gulp 
+
+RUN gulp build
+
+FROM alpine:3.7
+MAINTAINER Christian Berger "christian.berger@gu.se"
+
+RUN apk add libcluon --no-cache --repository https://chrberger.github.io/libcluon/alpine/v3.7 --allow-untrusted
+RUN mkdir -p /opt/bin && wget -O /opt/bin/websocketd https://github.com/se-research/websocketd-alpine/raw/master/x86_64/websocketd && chmod 755 /opt/bin/websocketd
+RUN mkdir /opt/vehicle-view
+COPY --from=builder /usr/local/apache2/htdocs/dist /opt/vehicle-view
+ENTRYPOINT ["/opt/bin/websocketd", "--staticdir=/opt/vehicle-view", "--port=8081", "--binary=true", "/bin/cluon-OD4toStdout"]
