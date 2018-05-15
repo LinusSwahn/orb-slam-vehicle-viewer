@@ -1,4 +1,5 @@
-# docker-compose.yml - Composition of micro-services to run OpenDLV software.
+
+
 # Copyright (C) 2016 Christian Berger
 #
 # This program is free software; you can redistribute it and/or
@@ -23,14 +24,23 @@ cd $(dirname $0)
 
 PROJ_ROOT=.
 
-DOCKERFILE=dockerfile.amd64
-IMAGE_NAME=opendlv-orbslam2-vehicle-viewer
+if [ "$1" == "gallery" ]; then
+    DOCKERFILE=dockerfile.amd64
+    ORG_NAME=seresearch
+    IMAGE_NAME=opendlv-gallery-orb2-slam
+    TAG=visualisation
+else
+   DOCKERFILE=dockerfile.amd64
+   ORG_NAME=seresearch
+   IMAGE_NAME=opendlv-orbslam2-vehicle-viewer
+   TAG=latest
+fi
 
-if docker build -f ${PROJ_ROOT}/${DOCKERFILE} -t chalmersrevere/${IMAGE_NAME}:latest ${PROJ_ROOT}; then
+if docker build -f ${PROJ_ROOT}/${DOCKERFILE} -t ${ORG_NAME}/${IMAGE_NAME}:${TAG} ${PROJ_ROOT}; then
     echo "                                                                                      "
     echo "######################################################################################"
     echo "To push the docker image to the registry, use the following command:"
-    echo "docker push chalmersrevere/${IMAGE_NAME}:latest"
+    echo "docker push ${ORG_NAME}/${IMAGE_NAME}:${TAG}"
     echo "######################################################################################"
     echo "                                                                                      "
 else
@@ -42,4 +52,3 @@ else
     echo "######################################################################################"
     echo "                                                                                      "
 fi
-
