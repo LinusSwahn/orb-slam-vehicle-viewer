@@ -125,11 +125,20 @@ animate();
 
 
 
-var insertCameraPoints = function (cameraPoint) {
+var insertCameraPoints = function (cameraPointsArray)
+{
     var positions = cameraPoints.geometry.attributes.position.array;
-    positions[currentCarIndex++] = cameraPoint.x;
-    positions[currentCarIndex++] = cameraPoint.y;
-    positions[currentCarIndex++] = cameraPoint.z;
+    if(currentCarIndex === 0)
+    {
+        console.log("camera reset");
+        positions.fill(0);
+    }
+    for(var i in cameraPointsArray)
+    {
+        positions[currentCarIndex++] = cameraPointsArray[i].x;
+        positions[currentCarIndex++] = cameraPointsArray[i].y;
+        positions[currentCarIndex++] = cameraPointsArray[i].z;
+    }
     cameraPoints.geometry.attributes.position.needsUpdate = true;
 };
 
@@ -142,30 +151,11 @@ var insertMapPoints = function (mapPoints)
     }
     for (var i in mapPoints)
     {
-        // if(currentIndex >= 36000 * 3)
-        // {
-        //     var positions2 = mapPointCloud2.geometry.attributes.position.array;
-        //     positions2[currentIndex++ - 36000 * 3] = mapPoints[i].x;
-        //     positions2[currentIndex++ - 36000 * 3] = mapPoints[i].y;
-        //     positions2[currentIndex++ - 36000 * 3] = mapPoints[i].z;
-        //     mapPointCloud2.geometry.attributes.position.needsUpdate = true;
-        // }
-        // else if(currentIndex >= 15000 * 3)
-        // {
-        //     var positions1 = mapPointCloud1.geometry.attributes.position.array;
-        //     positions1[currentIndex++ - 15000 * 3] = mapPoints[i].x;
-        //     positions1[currentIndex++ - 15000 * 3] = mapPoints[i].y;
-        //     positions1[currentIndex++ - 15000 * 3] = mapPoints[i].z;
-        //     mapPointCloud1.geometry.attributes.position.needsUpdate = true;
-        // }
-        // else
-        {
-            positions[currentIndex++] = mapPoints[i].x;
-            positions[currentIndex++] = mapPoints[i].y;
-            positions[currentIndex++] = mapPoints[i].z;
-            mapPointCloud.geometry.attributes.position.needsUpdate = true;
-        }
+        positions[currentIndex++] = mapPoints[i].x;
+        positions[currentIndex++] = mapPoints[i].y;
+        positions[currentIndex++] = mapPoints[i].z;
     }
+    mapPointCloud.geometry.attributes.position.needsUpdate = true;
 };
 
 var updateLidar = function (carPoint) {
@@ -180,9 +170,9 @@ var updateLidar = function (carPoint) {
     for (var i = 0; i < currentIndex; i += 3) {
         var mapPoint = new THREE.Vector3(mapPositions[i], mapPositions[i + 1], mapPositions[i + 2]);
 
-        lidarPositions[lidarIndex++] = mapPoint.x + carPoint.x;
-        lidarPositions[lidarIndex++] = mapPoint.y + carPoint.y;
-        lidarPositions[lidarIndex++] = mapPoint.z + carPoint.z;
+        lidarPositions[lidarIndex++] = mapPoint.x - carPoint.x;
+        lidarPositions[lidarIndex++] = mapPoint.y - carPoint.y;
+        lidarPositions[lidarIndex++] = mapPoint.z - carPoint.z;
     }
 
     var mapCarPositions = cameraPoints.geometry.attributes.position.array;
@@ -288,9 +278,8 @@ if ("WebSocket" in window) {
 
             // CompactPointCloud
             var mapCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.mapCoordinates);
-            var newIndex = data.opendlv_proxy_OrbslamMap.mapCoordinateIndex * 3;
-
-            currentIndex = newIndex;
+            currentIndex = data.opendlv_proxy_OrbslamMap.mapCoordinateIndex * 3;
+            currentCarIndex = data.opendlv_proxy_OrbslamMap.cameraCoordinateIndex * 3;
 
             var cameraCoordinatesRaw = window.atob(data.opendlv_proxy_OrbslamMap.cameraCoordinates);
             var cameraRotationRaw = window.atob(data.opendlv_proxy_OrbslamMap.cameraRotation);
@@ -299,16 +288,13 @@ if ("WebSocket" in window) {
             var cameraCoordinatesParsed = floatArrayFromString(cameraCoordinatesRaw, 4, ':');
             var cameraRotationParsed = floatArrayFromString(cameraRotationRaw, 4, ':');
             var mapPointsFromMap = mapPointsArrayFromFloatArray(mapCoordinatesParsed);
+            var cameraPoints = mapPointsArrayFromFloatArray(cameraCoordinatesParsed);
 
-            var cameraPoint = new THREE.Vector3(cameraCoordinatesParsed[0], cameraCoordinatesParsed[1], cameraCoordinatesParsed[2]);
             var cameraRadianRotation = new THREE.Vector3(cameraRotationParsed[0], cameraRotationParsed[1], cameraRotationParsed[2]);
-            var cameraRotation = new THREE.Vector3(THREE.Math.radToDeg(cameraRadianRotation.x),
-                THREE.Math.radToDeg(cameraRadianRotation.y),
-                THREE.Math.radToDeg(cameraRadianRotation.z));
 
-            insertCameraPoints(cameraPoint);
+            insertCameraPoints(cameraPoints);
             insertMapPoints(mapPointsFromMap);
-            updateLidar(cameraPoint, mapPointsFromMap);
+            // updateLidar(cameraPoint[0], mapPointsFromMap);
         }
         if (data.dataType == 49) {
             // CompactPointCloud
