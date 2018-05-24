@@ -1,99 +1,58 @@
-
-var originalCameraRotation = new THREE.Vector3(0, 0, 0);
-
-
-
 var mapScene = new THREE.Scene();
-// var lidarScene = new THREE.Scene();
 
 var mapRenderer = new THREE.WebGLRenderer();
-// var lidarRenderer = new THREE.WebGLRenderer();
 
-var orbMapContainer = document.getElementById('tdMapContainer');
-// var tdMapContainer = document.getElementById('tdMapContainer');
+var mapContainer = document.getElementById('tdMapContainer');
 mapRenderer.setSize($(tdMapContainer).width(),$(tdMapContainer).height());
-orbMapContainer.appendChild(mapRenderer.domElement);
-// lidarRenderer.setSize($(tdMapContainer).width(), $(tdMapContainer).height());
-// tdMapContainer.appendChild(lidarRenderer.domElement);
-
-// mapRenderer.setSize( 700, 500 );
-// lidarRenderer.setSize( 700, 500 );
+mapContainer.appendChild(mapRenderer.domElement);
 
 mapRenderer.setClearColor(new THREE.Color(0x00000000));
-// lidarRenderer.setClearColor(new THREE.Color(0x00000000));
 
 document.getElementById('3d-map').appendChild(mapRenderer.domElement);
-// document.getElementById('orb-map').appendChild(lidarRenderer.domElement);
 
-var mapCamera = new THREE.PerspectiveCamera(75, $(orbMapContainer).width() / $(orbMapContainer).height(), 0.1, 10000);
-// var lidarCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+var mapCamera = new THREE.PerspectiveCamera(75, $(mapContainer).width() / $(mapContainer).height(), 0.1, 10000);
 
 var update_time_stamps = [];
 
 mapCamera.position.y = -5;
-// lidarCamera.position.y = -5;
 mapCamera.lookAt(0, 0, 0);
-// lidarCamera.lookAt(0, 0, 0);
 mapScene.add(mapCamera);
-// lidarScene.add(lidarCamera);
 
 var mapPointLight = new THREE.PointLight(0xffffff);
-// var lidarPointLight = new THREE.PointLight(0xffffff);
 mapPointLight.position.set(0, 20, 20);
-// lidarPointLight.position.set(0, 20, 20);
 mapScene.add(mapPointLight);
-// lidarScene.add(lidarPointLight);
 
 var mapControls = new THREE.FlyControls(mapCamera, mapRenderer.domElement);
 mapControls.autoForward = false;
 mapControls.dragToLook = true;
 mapControls.movementSpeed = 1;
 mapControls.rollSpeed = 0.05;
-// var lidarControls = new THREE.OrbitControls(lidarCamera, lidarRenderer.domElement);
 
 var mapAmbientLight = new THREE.AmbientLight(0xaaaaaa);
-// var lidarAmbientLight = new THREE.AmbientLight(0xaaaaaa);
 mapScene.add(mapAmbientLight);
-// lidarScene.add(lidarAmbientLight);
 
-// var gridXZ = new THREE.GridHelper(50, 50, 0xff0000, 0x0000ff);
-// lidarScene.add(gridXZ);
 
 var mapPointGeometry = new THREE.BufferGeometry();
 var carPointGeometry = new THREE.BufferGeometry();
-// var lidarPointGeometry = new THREE.BufferGeometry();
-// var lidarCarPointGeometry = new THREE.BufferGeometry();
 var MAX_POINTS = 1000000;
 
 var mapPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per
 var carPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per
-// var lidarPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
-// var lidarCarPositions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
 
 mapPositions.fill(0);
 carPositions.fill(0);
-// lidarPositions.fill(0);
-// lidarCarPositions.fill(0);
 
 mapPointGeometry.addAttribute('position', new THREE.BufferAttribute(mapPositions, 3));
 carPointGeometry.addAttribute('position', new THREE.BufferAttribute(carPositions, 3));
-// lidarPointGeometry.addAttribute('position', new THREE.BufferAttribute(lidarPositions, 3));
-// lidarCarPointGeometry.addAttribute('position', new THREE.BufferAttribute(lidarCarPositions, 3));
 
 var mapMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.02 });
 var carMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 0.4 });
-// var lidarMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.02 });
-// var lidarCarMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 0.05 });
 
 var mapPointCloud = new THREE.Points(mapPointGeometry, mapMaterial);
 var cameraPoints = new THREE.Points(carPointGeometry, carMaterial);
-// var lidarPointCloud = new THREE.Points(lidarPointGeometry, lidarMaterial);
-// var lidarCarPointCloud = new THREE.Points(lidarCarPointGeometry, lidarCarMaterial);
 
 mapScene.add(mapPointCloud);
 mapScene.add(cameraPoints);
-// lidarScene.add(lidarPointCloud);
-// lidarScene.add(lidarCarPointCloud);
 
 var currentIndex = 0;
 var currentCarIndex = 0;
@@ -102,13 +61,10 @@ var animate = function ()
 {
     requestAnimationFrame(animate);
     mapRenderer.render(mapScene, mapCamera);
-    // lidarRenderer.render(lidarScene, lidarCamera);
     mapControls.update(1);
 };
 
 animate();
-
-
 
 
 var insertCameraPoints = function (cameraPointsArray)
@@ -141,36 +97,6 @@ var insertMapPoints = function (mapPoints)
         positions[currentIndex++] = mapPoints[i].z;
     }
     mapPointCloud.geometry.attributes.position.needsUpdate = true;
-};
-
-var updateLidar = function (carPoint) {
-    var lidarPositions = lidarPointCloud.geometry.attributes.position.array;
-    var carPositions = lidarCarPointCloud.geometry.attributes.position.array;
-    lidarPositions.fill(0);
-    carPositions.fill(0);
-    var lidarIndex = 0;
-    var carIndex = 0;
-
-    var mapPositions = mapPointCloud.geometry.attributes.position.array;
-    for (var i = 0; i < currentIndex; i += 3) {
-        var mapPoint = new THREE.Vector3(mapPositions[i], mapPositions[i + 1], mapPositions[i + 2]);
-
-        lidarPositions[lidarIndex++] = mapPoint.x - carPoint.x;
-        lidarPositions[lidarIndex++] = mapPoint.y - carPoint.y;
-        lidarPositions[lidarIndex++] = mapPoint.z - carPoint.z;
-    }
-
-    var mapCarPositions = cameraPoints.geometry.attributes.position.array;
-    for (var j = 0; j < currentIndex; j += 3) {
-        var mapCarPoint = new THREE.Vector3(mapCarPositions[j], mapCarPositions[j + 1], mapCarPositions[j + 2]);
-
-        carPositions[carIndex++] = carPoint.x;
-        carPositions[carIndex++] = carPoint.y;
-        carPositions[carIndex++] = carPoint.z;
-    }
-
-    lidarPointCloud.geometry.attributes.position.needsUpdate = true;
-    lidarCarPointCloud.geometry.attributes.position.needsUpdate = true;
 };
 
 var floatArrayFromString = function (inString, precision, delimiter) {
