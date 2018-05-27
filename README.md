@@ -26,7 +26,7 @@ No dependencies! The following dependencies are part of the source distribution:
 ## Usage
 In order to build this repository, docker is required.
 
-You can either build and run only this microservice by itself for debugging by running the ´build_and_run.sh´ bash script.
+You can either build and run only this microservice by itself for debugging by running the `build_and_run.sh` bash script.
 
 The alternative is to build this image using `buildImage.sh` and then running it in combintaion with the ORB-SLAM2 OpenDLV implementation. Further instructions located at the [ORB-SLAM2 repository](https://github.com/chalmers-revere/opendlv-perception-vision-orbslam2)
 
