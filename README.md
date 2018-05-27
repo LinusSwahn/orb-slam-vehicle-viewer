@@ -1,8 +1,6 @@
-## OpenDLV Microservice to view vehicle onboard data in your web-browser
+## OpenDLV Microservice to view output from the ORB-SLAM2 OpenDLV implementation
 
-This repository provides source code to view selected vehicle onboard data like
-GPS position and point clouds that are exchanged in a running session using
-the OpenDLV software ecosystem.
+This repository provides source code to view the output generated from the ORB-SLAM2 OpenDLV implementation available at: [OpenDLV ORB-SLAM2](https://github.com/chalmers-revere/opendlv-perception-vision-orbslam2) 
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
@@ -26,22 +24,14 @@ No dependencies! The following dependencies are part of the source distribution:
 
 
 ## Usage
-This microservice is created automatically on changes to this repository via
-Docker's public registry for:
-* [x86_64](https://hub.docker.com/r/chalmersrevere/opendlv-vehicle-view-amd64/tags/)
+In order to build this repository, docker is required.
 
-To use this microservice for viewing selected vehicle onboard messages from the
-OpenDLV Standard Message Set that are exchanged in a running OpenDLV.io session
-(running at 111 in the example), simply run it as follows:
+You can either build and run only this microservice by itself for debugging by running the ´build_and_run.sh´ bash script.
 
-```
-docker run --rm --net=host -p 8081:8081 chalmersrevere/opendlv-vehicle-view-amd64:v0.0.5 --cid=111
-```
+The alternative is to build this image using `buildImage.sh` and then running it in combintaion with the ORB-SLAM2 OpenDLV implementation. Further instructions located at the [ORB-SLAM2 repository](https://github.com/chalmers-revere/opendlv-perception-vision-orbslam2)
 
-Now, simply point your web-browser to the IP address and port 8081 where you
-started this microservice to see any currently exchanged messages:
-
-![screenshot from vehicle view](https://raw.githubusercontent.com/chalmers-revere/opendlv-vehicle-view/master/vehicle-view-animated.gif)
+When the microservice is running, simply point your web-browser to the IP address and port 8081 where you
+started this microservice to see any currently exchanged messages. The default ip is localhost.
 
 
 ## License
